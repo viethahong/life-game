@@ -389,6 +389,13 @@ const UI_HANDLERS = {
         });
     },
 
+    resetGame: () => {
+        if (confirm('Bạn có chắc chắn muốn XÓA TOÀN BỘ dữ liệu và bắt đầu lại từ đầu không?')) {
+            localStorage.clear();
+            window.location.reload();
+        }
+    },
+
     closeModal: () => {
         document.getElementById('modal-overlay').classList.add('hidden');
     }

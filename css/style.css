@@ -61,6 +61,17 @@ h1, h2, h3, .logo {
     z-index: 100;
 }
 
+.nav-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+#reset-btn:hover {
+    color: #ef4444;
+    text-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+}
+
 .logo {
     font-size: 1.25rem;
     letter-spacing: 2px;
