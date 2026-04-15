@@ -1,6 +1,7 @@
 // Main Application Orchestrator
 const UI_HANDLERS = {
     charts: { xp: null, radar: null },
+    currentScreen: 'home',
 
     // Initial App Load
     init: () => {
@@ -10,29 +11,58 @@ const UI_HANDLERS = {
             UI_HANDLERS.showOnboarding();
         } else {
             UI_HANDLERS.showDashboard();
+            // Automatically show guide for returning users who haven't seen the new UI
+            if (!localStorage.getItem('LIFE_GAME_GUIDE_SEEN')) {
+                UI_HANDLERS.showGuide();
+                localStorage.setItem('LIFE_GAME_GUIDE_SEEN', 'true');
+            }
         }
         
-        UI_HANDLERS.setupTabs();
+        UI_HANDLERS.setupBottomNav();
+        UI_HANDLERS.setupGlobalEvents();
     },
 
-    setupTabs: () => {
-        document.querySelectorAll('.tab-btn').forEach(btn => {
+    setupBottomNav: () => {
+        document.querySelectorAll('.nav-item').forEach(btn => {
             btn.onclick = () => {
-                document.querySelectorAll('.tab-btn, .tab-pane').forEach(el => el.classList.remove('active'));
-                btn.classList.add('active');
-                const tabId = btn.dataset.tab + '-tab';
-                document.getElementById(tabId).classList.add('active');
-                
-                if (btn.dataset.tab === 'analytics') {
-                    UI_HANDLERS.initCharts();
-                }
+                const screenId = btn.dataset.screen;
+                UI_HANDLERS.switchScreen(screenId);
             };
         });
     },
 
+    setupGlobalEvents: () => {
+        document.getElementById('help-btn').onclick = UI_HANDLERS.showGuide;
+        document.getElementById('add-quest-btn').onclick = UI_HANDLERS.addQuest;
+        document.getElementById('add-income-btn').onclick = UI_HANDLERS.addIncome;
+    },
+
+    switchScreen: (screenId) => {
+        UI_HANDLERS.currentScreen = screenId;
+        
+        // Update Nav UI
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.screen === screenId);
+        });
+
+        // Update Screen Visibility
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.classList.add('hidden');
+        });
+        document.getElementById(`${screenId}-screen`).classList.remove('hidden');
+
+        // Context-specific updates
+        if (screenId === 'analytics') {
+            UI_HANDLERS.initCharts();
+        }
+        
+        UI_HANDLERS.updateUI();
+    },
+
     showOnboarding: () => {
-        document.getElementById('dashboard').classList.add('hidden');
+        document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
         document.getElementById('onboarding').classList.remove('hidden');
+        document.getElementById('bottom-nav').classList.add('hidden');
         COMPONENTS.renderClassGrid(CHARACTER_CLASSES, UI_HANDLERS.selectClass);
     },
 
@@ -44,7 +74,7 @@ const UI_HANDLERS = {
             level: 1,
             xp: 0,
             gold: 0,
-            sp: 1, // Start with 1 Skill Point
+            sp: 1, 
             stats: { ...cls.baseStats }
         };
         GAME_STATE.history = { xp: [], gold: [] };
@@ -53,48 +83,60 @@ const UI_HANDLERS = {
         
         PERSISTENCE.save();
         UI_HANDLERS.showDashboard();
+        UI_HANDLERS.showGuide();
     },
 
     showDashboard: () => {
         document.getElementById('onboarding').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
-        UI_HANDLERS.updateUI();
+        document.getElementById('bottom-nav').classList.remove('hidden');
+        UI_HANDLERS.switchScreen('home');
+    },
+
+    showGuide: () => {
+        const content = COMPONENTS.renderGuide();
+        COMPONENTS.showModal('CÁCH CHƠI LIFE GAME', content);
     },
 
     updateUI: () => {
         const char = GAME_STATE.character;
         if (!char) return;
 
-        // Header info
-        document.getElementById('char-name').textContent = char.name;
-        const rankInfo = PROGRESSION.getRankInfo(char.level);
-        document.getElementById('char-class-title').textContent = `${char.className} • Level ${char.level} (${rankInfo.currentRank.name})`;
-        
-        // Nav stats
+        // Permanent Nav Stats
         document.getElementById('nav-level-badge').textContent = `LVL ${char.level}`;
         document.getElementById('nav-gold-display').textContent = `${char.gold.toLocaleString()} Gold`;
         
-        // XP Progress
         const xpRequired = PROGRESSION.getXPRequired(char.level);
         const xpPercent = (char.xp / xpRequired) * 100;
         document.getElementById('nav-xp-progress').style.width = `${xpPercent}%`;
 
-        // Stats
-        document.querySelectorAll('.stat-card').forEach(card => {
-            const statType = card.dataset.stat;
-            const value = char.stats[statType] || 0;
-            card.querySelector('.stat-value').textContent = value;
-            card.querySelector('.stat-fill').style.width = `${Math.min(value * 2, 100)}%`;
-        });
+        // Screen-specific Rendering
+        if (UI_HANDLERS.currentScreen === 'home') {
+            document.getElementById('char-name').textContent = char.name;
+            const rankInfo = PROGRESSION.getRankInfo(char.level);
+            document.getElementById('char-class-title').textContent = `${char.className} • Level ${char.level} (${rankInfo.currentRank.name})`;
 
-        // Phase 2: Renders
-        COMPONENTS.renderQuests(GAME_STATE.quests, UI_HANDLERS.toggleQuest);
-        COMPONENTS.renderIncome(GAME_STATE.income);
-        COMPONENTS.renderJourneyMap(char.level);
-        COMPONENTS.renderSkills(SKILLS_DB, GAME_STATE.skills, char.sp);
-        COMPONENTS.renderAchievements(ACHIEVEMENTS_DB, GAME_STATE.achievements);
+            document.querySelectorAll('.stat-card').forEach(card => {
+                const statType = card.dataset.stat;
+                const value = char.stats[statType] || 0;
+                card.querySelector('.stat-value').textContent = value;
+                card.querySelector('.stat-fill').style.width = `${Math.min(value * 2, 100)}%`;
+            });
+            COMPONENTS.renderJourneyMap(char.level);
+        }
+
+        if (UI_HANDLERS.currentScreen === 'quests') {
+            COMPONENTS.renderQuests(GAME_STATE.quests, UI_HANDLERS.toggleQuest);
+            COMPONENTS.renderIncome(GAME_STATE.income);
+        }
+
+        if (UI_HANDLERS.currentScreen === 'skills') {
+            COMPONENTS.renderSkills(SKILLS_DB, GAME_STATE.skills, char.sp);
+        }
+
+        if (UI_HANDLERS.currentScreen === 'analytics') {
+            COMPONENTS.renderAchievements(ACHIEVEMENTS_DB, GAME_STATE.achievements);
+        }
         
-        // Check for new achievements
         UI_HANDLERS.checkAchievements();
     },
 
@@ -136,10 +178,8 @@ const UI_HANDLERS = {
         
         if (quest.completed) {
             let bonus = 0;
-            // Apply skill buffs
             if (GAME_STATE.skills.includes('deep_work_1')) bonus += quest.xp * 0.1;
             if (GAME_STATE.skills.includes('flow_state') && quest.xp >= 100) bonus += 50;
-            
             UI_HANDLERS.addXP(quest.xp + bonus);
         } else {
             UI_HANDLERS.addXP(-quest.xp);
@@ -167,15 +207,11 @@ const UI_HANDLERS = {
             let amount = parseInt(document.getElementById('i-amount').value);
             
             if (source && amount) {
-                // Skill buff: Gold Magnet
-                if (GAME_STATE.skills.includes('gold_magnet_1')) {
-                    amount = Math.floor(amount * 1.05);
-                }
+                if (GAME_STATE.skills.includes('gold_magnet_1')) amount = Math.floor(amount * 1.05);
 
                 GAME_STATE.income.push({ source, amount, timestamp: Date.now() });
                 GAME_STATE.character.gold += amount;
                 
-                // Record history
                 const date = new Date().toISOString().split('T')[0];
                 GAME_STATE.history.gold.push({ date, amount });
                 
@@ -194,18 +230,16 @@ const UI_HANDLERS = {
         char.xp += amount;
         if (char.xp < 0) char.xp = 0;
 
-        // Record history
         if (amount > 0) {
             const date = new Date().toISOString().split('T')[0];
             GAME_STATE.history.xp.push({ date, amount });
         }
 
         let xpRequired = PROGRESSION.getXPRequired(char.level);
-        
         while (char.xp >= xpRequired) {
             char.xp -= xpRequired;
             char.level++;
-            char.sp += 1; // Gain 1 Skill Point on level up
+            char.sp += 1;
             xpRequired = PROGRESSION.getXPRequired(char.level);
             
             Object.keys(char.stats).forEach(s => char.stats[s] += 1);
@@ -218,12 +252,7 @@ const UI_HANDLERS = {
         if (GAME_STATE.character.sp >= skill.cost && !GAME_STATE.skills.includes(skillId)) {
             GAME_STATE.character.sp -= skill.cost;
             GAME_STATE.skills.push(skillId);
-            
-            // Apply immediate stat effects
-            if (skill.type === 'stat') {
-                GAME_STATE.character.stats[skill.effect.stat] += skill.effect.value;
-            }
-            
+            if (skill.type === 'stat') GAME_STATE.character.stats[skill.effect.stat] += skill.effect.value;
             PERSISTENCE.save();
             UI_HANDLERS.updateUI();
         }
@@ -233,7 +262,6 @@ const UI_HANDLERS = {
         ACHIEVEMENTS_DB.forEach(ach => {
             if (!GAME_STATE.achievements.includes(ach.id) && ach.criteria(GAME_STATE)) {
                 GAME_STATE.achievements.push(ach.id);
-                // Notification for new achievement could go here
                 PERSISTENCE.save();
             }
         });
@@ -243,11 +271,9 @@ const UI_HANDLERS = {
         const char = GAME_STATE.character;
         if (!char) return;
 
-        // Destroy old charts to clean re-render
         if (UI_HANDLERS.charts.xp) UI_HANDLERS.charts.xp.destroy();
         if (UI_HANDLERS.charts.radar) UI_HANDLERS.charts.radar.destroy();
 
-        // XP Chart (Mocking last 7 days or real history)
         const xpCtx = document.getElementById('xp-chart').getContext('2d');
         UI_HANDLERS.charts.xp = new Chart(xpCtx, {
             type: 'line',
@@ -255,7 +281,7 @@ const UI_HANDLERS = {
                 labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
                 datasets: [{
                     label: 'XP Gained',
-                    data: [12, 19, 3, 5, 2, 3, 0], // Sample data, real would be grouped from history
+                    data: [12, 19, 3, 5, 2, 3, 0], 
                     borderColor: '#4f46e5',
                     tension: 0.4,
                     fill: true,
@@ -265,18 +291,14 @@ const UI_HANDLERS = {
             options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
         });
 
-        // Radar Chart for Stats
         const radarCtx = document.getElementById('radar-chart').getContext('2d');
-        const statLabels = Object.keys(char.stats).map(s => s.toUpperCase());
-        const statData = Object.values(char.stats);
-
         UI_HANDLERS.charts.radar = new Chart(radarCtx, {
             type: 'radar',
             data: {
-                labels: statLabels,
+                labels: Object.keys(char.stats).map(s => s.toUpperCase()),
                 datasets: [{
                     label: 'Stats',
-                    data: statData,
+                    data: Object.values(char.stats),
                     backgroundColor: 'rgba(79, 70, 229, 0.2)',
                     borderColor: '#4f46e5',
                     pointBackgroundColor: '#4f46e5'
@@ -300,10 +322,6 @@ const UI_HANDLERS = {
         document.getElementById('modal-overlay').classList.add('hidden');
     }
 };
-
-// Event Listeners
-document.getElementById('add-quest-btn').onclick = UI_HANDLERS.addQuest;
-document.getElementById('add-income-btn').onclick = UI_HANDLERS.addIncome;
 
 // Boot
 window.onload = UI_HANDLERS.init;

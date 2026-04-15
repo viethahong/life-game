@@ -24,127 +24,125 @@
                 </div>
                 <span id="nav-gold-display">0 Gold</span>
             </div>
-            <button id="menu-toggle" aria-label="Open Menu">
-                <span class="dot"></span>
-                <span class="dot"></span>
-                <span class="dot"></span>
-            </button>
+            <button id="help-btn" class="icon-btn" title="How to Play">❓</button>
         </nav>
 
         <main id="main-content">
-            <!-- Dynamic Content Injected Here -->
-            <section id="onboarding" class="hidden">
+            <!-- 0. Onboarding -->
+            <section id="onboarding" class="screen hidden">
                 <h1 class="premium-heading">CHOOSE YOUR PATH</h1>
                 <p class="subtitle">Bạn là ai trong thế giới này?</p>
                 <div class="class-selection-grid" id="class-grid"></div>
             </section>
 
-            <section id="dashboard">
-                <header class="section-header">
-                    <h1 id="char-name">Shadow Monk</h1>
-                    <p id="char-class-title">Creator • Level 1</p>
+            <!-- 1. Home Screen (Dashboard & Journey) -->
+            <section id="home-screen" class="screen">
+                <header class="screen-header">
+                    <h1 id="char-name">Hero</h1>
+                    <p id="char-class-title">Initiate • Level 1</p>
                 </header>
 
                 <div class="stats-row">
-                    <div class="stat-card" data-stat="str">
-                        <span class="label">STR</span>
-                        <div class="stat-value">10</div>
-                        <div class="stat-fill" style="width: 50%"></div>
-                    </div>
-                    <div class="stat-card" data-stat="int">
-                        <span class="label">INT</span>
-                        <div class="stat-value">12</div>
-                        <div class="stat-fill" style="width: 60%"></div>
-                    </div>
-                    <div class="stat-card" data-stat="cha">
-                        <span class="label">CHA</span>
-                        <div class="stat-value">8</div>
-                        <div class="stat-fill" style="width: 40%"></div>
-                    </div>
-                    <div class="stat-card" data-stat="wis">
-                        <span class="label">WIS</span>
-                        <div class="stat-value">11</div>
-                        <div class="stat-fill" style="width: 55%"></div>
-                    </div>
+                    <div class="stat-card" data-stat="str"><span class="label">STR</span><div class="stat-value">10</div><div class="stat-fill"></div></div>
+                    <div class="stat-card" data-stat="int"><span class="label">INT</span><div class="stat-value">10</div><div class="stat-fill"></div></div>
+                    <div class="stat-card" data-stat="cha"><span class="label">CHA</span><div class="stat-value">10</div><div class="stat-fill"></div></div>
+                    <div class="stat-card" data-stat="wis"><span class="label">WIS</span><div class="stat-value">10</div><div class="stat-fill"></div></div>
                 </div>
 
-                <!-- NEW: Journey Map -->
-                <section id="journey-section" class="card-section">
+                <section id="journey-preview" class="card-section">
                     <div class="card-header">
                         <h2>JOURNEY MAP</h2>
                         <span id="rank-name" class="accent-text">Apprentice</span>
                     </div>
                     <div class="journey-track-container">
                         <div id="journey-progress-bar"></div>
-                        <div class="journey-milestones" id="journey-milestones">
-                            <!-- Milestones injected here -->
-                        </div>
+                        <div class="journey-milestones" id="journey-milestones"></div>
                     </div>
                 </section>
+            </section>
 
-                <div class="tabs-nav">
-                    <button class="tab-btn active" data-tab="quests">Quests & Loot</button>
-                    <button class="tab-btn" data-tab="skills">Skill Tree</button>
-                    <button class="tab-btn" data-tab="achievements">Achievements</button>
-                    <button class="tab-btn" data-tab="analytics">Analytics</button>
+            <!-- 2. Quests Screen -->
+            <section id="quests-screen" class="screen hidden">
+                <div class="screen-header">
+                    <h1>QUEST LOG</h1>
+                    <p>Hoàn thành nhiệm vụ để nhận XP và Vàng</p>
                 </div>
 
-                <div id="tab-content">
-                    <div id="quests-tab" class="tab-pane active">
-                        <div class="content-grid">
-                            <div class="column quest-column">
-                                <div class="card-header">
-                                    <h2>QUEST LOG</h2>
-                                    <button class="btn-add" id="add-quest-btn">+</button>
-                                </div>
-                                <div id="quest-list" class="item-list">
-                                    <div class="quest-item empty-state">Chưa có nhiệm vụ hôm nay...</div>
-                                </div>
-                            </div>
-
-                            <div class="column income-column">
-                                <div class="card-header">
-                                    <h2>LOOT / INCOME</h2>
-                                    <button class="btn-add" id="add-income-btn">+</button>
-                                </div>
-                                <div id="income-list" class="item-list">
-                                </div>
-                            </div>
+                <div class="quest-loot-container">
+                    <div class="card-section">
+                        <div class="card-header">
+                            <h3>ACTIVE QUESTS</h3>
+                            <button class="btn-add" id="add-quest-btn">+</button>
                         </div>
+                        <div id="quest-list" class="item-list"></div>
                     </div>
 
-                    <div id="skills-tab" class="tab-pane">
-                        <div class="skills-container">
-                            <div class="skills-header">
-                                <p>Skill Points: <span id="skill-points-value">0</span></p>
-                            </div>
-                            <div id="skills-grid" class="skills-grid">
-                                <!-- Skills injected here -->
-                            </div>
+                    <div class="card-section">
+                        <div class="card-header">
+                            <h3>RECENT LOOT</h3>
+                            <button class="btn-add" id="add-income-btn">+</button>
                         </div>
-                    </div>
-
-                    <div id="achievements-tab" class="tab-pane">
-                        <div id="achievements-grid" class="achievements-grid">
-                            <!-- Achievements injected here -->
-                        </div>
-                    </div>
-
-                    <div id="analytics-tab" class="tab-pane">
-                        <div class="analytics-row">
-                            <div class="chart-container">
-                                <h3>XP PROGRESSION (7 DAYS)</h3>
-                                <canvas id="xp-chart"></canvas>
-                            </div>
-                            <div class="chart-container">
-                                <h3>STAT DISTRIBUTION</h3>
-                                <canvas id="radar-chart"></canvas>
-                            </div>
-                        </div>
+                        <div id="income-list" class="item-list"></div>
                     </div>
                 </div>
             </section>
+
+            <!-- 3. Skills Screen -->
+            <section id="skills-screen" class="screen hidden">
+                <div class="screen-header">
+                    <h1>SKILL TREE</h1>
+                    <p>Sử dụng Skill Points để mở khóa Buff</p>
+                </div>
+                <div class="skills-dashboard-header">
+                    <p>Điểm kỹ năng: <span id="skill-points-value">0</span> SP</p>
+                </div>
+                <div id="skills-grid" class="skills-grid"></div>
+            </section>
+
+            <!-- 4. Analytics & Achievements Screen -->
+            <section id="analytics-screen" class="screen hidden">
+                <div class="screen-header">
+                    <h1>PROGRESS</h1>
+                    <p>Phân tích chỉ số và thành tựu</p>
+                </div>
+
+                <div class="analytics-row">
+                    <div class="chart-container">
+                        <h3>XP HISTORY</h3>
+                        <canvas id="xp-chart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>STAT RADAR</h3>
+                        <canvas id="radar-chart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card-section">
+                    <h3>ACHIEVEMENTS</h3>
+                    <div id="achievements-grid" class="achievements-grid"></div>
+                </div>
+            </section>
         </main>
+
+        <!-- Bottom Navigation -->
+        <nav id="bottom-nav">
+            <button class="nav-item active" data-screen="home">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Home</span>
+            </button>
+            <button class="nav-item" data-screen="quests">
+                <span class="nav-icon">📜</span>
+                <span class="nav-label">Quests</span>
+            </button>
+            <button class="nav-item" data-screen="skills">
+                <span class="nav-icon">🧠</span>
+                <span class="nav-label">Skills</span>
+            </button>
+            <button class="nav-item" data-screen="analytics">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Analytics</span>
+            </button>
+        </nav>
 
         <!-- Modals -->
         <div id="modal-overlay" class="hidden">

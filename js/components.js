@@ -149,6 +149,47 @@ const COMPONENTS = {
         `;
         
         overlay.classList.remove('hidden');
-        document.getElementById('modal-save-btn').onclick = onSave;
+        if (onSave) {
+            document.getElementById('modal-save-btn').onclick = onSave;
+        } else {
+            document.getElementById('modal-save-btn').textContent = 'Đã Hiểu';
+            document.getElementById('modal-save-btn').onclick = UI_HANDLERS.closeModal;
+        }
+    },
+
+    // Phase 3: Render Guide Content
+    renderGuide: () => {
+        return `
+            <div class="guide-content">
+                <div class="guide-step">
+                    <div class="icon">📜</div>
+                    <div class="info">
+                        <h4>1. LÀM NHIỆM VỤ (QUESTS)</h4>
+                        <p>Tự tạo các thử thách thực tế trong ngày. Mỗi nhiệm vụ hoàn thành sẽ mang lại XP và Vàng.</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="icon">💰</div>
+                    <div class="info">
+                        <h4>2. THU THẬP "LOOT" (GOLD)</h4>
+                        <p>Ghi nhận thu nhập thực tế của bạn. Càng kiếm nhiều vàng, bạn càng nhận thêm nhiều XP thưởng.</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="icon">📈</div>
+                    <div class="info">
+                        <h4>3. LÊN CẤP & TĂNG CHỈ SỐ</h4>
+                        <p>Khi đủ XP, bạn sẽ lên cấp. Các chỉ số (STR, INT, CHA...) sẽ tăng lên giúp bạn mạnh mẽ hơn.</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="icon">🧠</div>
+                    <div class="info">
+                        <h4>4. MỞ KHÓA KỸ NĂNG</h4>
+                        <p>Sử dụng Skill Points (nhận được khi lên cấp) để mở khóa các Buff vĩnh viễn trong Cây kỹ năng.</p>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 };
