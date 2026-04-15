@@ -426,8 +426,59 @@ h1, h2, h3, .logo {
     margin-top: 32px;
 }
 
-/* Onboarding Multi-step */
-.onboarding-container {
+/* Onboarding Back Button */
+.btn-back-quiz {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    cursor: pointer;
+    margin-top: 16px;
+    padding: 8px;
+    transition: color 0.2s;
+    text-decoration: underline;
+    opacity: 0.7;
+}
+
+.btn-back-quiz:hover {
+    color: var(--text-main);
+    opacity: 1;
+}
+
+/* Mini Help Button in headers */
+.btn-help-mini {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-dim);
+    font-size: 0.7rem;
+    cursor: pointer;
+    margin-left: 8px;
+    vertical-align: middle;
+    transition: all 0.2s;
+}
+
+.btn-help-mini:hover {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+    box-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* Adjustments for localized stat labels */
+.stat-card .label {
+    font-size: 0.65rem; /* Slightly smaller to fit "Sức mạnh" */
+    font-weight: 600;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
     max-width: 600px;
     margin: 0 auto;
     padding: 60px 20px 40px;

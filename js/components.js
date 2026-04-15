@@ -229,6 +229,7 @@ const COMPONENTS = {
             <p class="step-label">BƯỚC 2 / 3 &nbsp;•&nbsp; Câu ${questionIndex + 1} / ${total}</p>
             <h2 class="onboarding-title" style="font-size:1.4rem;line-height:1.4">${question.question}</h2>
             <div class="quiz-options">${optionsHTML}</div>
+            <button class="btn-back-quiz" onclick="ONBOARDING.prevQuestion()">← Quay lại</button>
         `;
     },
 
@@ -257,6 +258,73 @@ const COMPONENTS = {
                 — nhưng bạn hoàn toàn có thể chọn class khác!
             </p>
             <div class="class-selection-grid">${cardsHTML}</div>
+        `;
+    },
+
+    // Detailed Help per Screen
+    renderQuestsHelp: () => {
+        return `
+            <div class="guide-content">
+                <div class="guide-step">
+                    <div class="icon">📜</div>
+                    <div class="info">
+                        <h4>NHIỆM VỤ (QUESTS)</h4>
+                        <p>Đây là danh sách các việc bạn cần làm trong ngày. Mỗi nhiệm vụ có độ khó từ E đến S.</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="icon">💰</div>
+                    <div class="info">
+                        <h4>THU NHẬP (LOOT)</h4>
+                        <p>Ghi lại số tiền bạn kiếm được thực tế. 1,000 Gold sẽ mang lại cho bạn khoảng 1-5 XP thưởng.</p>
+                    </div>
+                </div>
+                <p style="margin-top:20px; font-size:0.9rem; color:var(--text-dim)">
+                    Mẹo: Hãy chia nhỏ các nhiệm vụ lớn thành nhiều nhiệm vụ nhỏ để dễ dàng tích lũy XP hơn.
+                </p>
+            </div>
+        `;
+    },
+
+    renderSkillsHelp: () => {
+        return `
+            <div class="guide-content">
+                <div class="guide-step">
+                    <div class="icon">🧠</div>
+                    <div class="info">
+                        <h4>KỸ NĂNG (SKILLS)</h4>
+                        <p>Mỗi khi lên cấp, bạn nhận được 1 Skill Point (SP). Dùng SP để mở khóa các thẻ kỹ năng.</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="icon">⚡</div>
+                    <div class="info">
+                        <h4>BUFF CHỈ SỐ</h4>
+                        <p>Có 2 loại kỹ năng: Tăng chỉ số vĩnh viễn (STR, INT...) hoặc Tăng % XP/Vàng nhận được.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    renderAnalyticsHelp: () => {
+        return `
+            <div class="guide-content">
+                <div class="guide-step">
+                    <div class="icon">📊</div>
+                    <div class="info">
+                        <h4>BIỂU ĐỒ XP</h4>
+                        <p>Theo dõi sự nỗ lực của bạn qua từng ngày. Đừng để biểu đồ đi xuống quá lâu!</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="icon">🕸️</div>
+                    <div class="info">
+                        <h4>RADAR CHỈ SỐ</h4>
+                        <p>Giúp bạn thấy mình đang phát triển lệch về hướng nào để cân bằng lại cuộc sống.</p>
+                    </div>
+                </div>
+            </div>
         `;
     }
 };

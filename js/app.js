@@ -5,11 +5,13 @@ const ONBOARDING = {
     playerName: '',
     quizScores: { creator: 0, warrior: 0, merchant: 0, sage: 0 },
     currentQuestion: 0,
+    answers: [], // Lưu lại lịch sử classId để có thể lùi lại
 
     start: () => {
         ONBOARDING.playerName = '';
         ONBOARDING.quizScores = { creator: 0, warrior: 0, merchant: 0, sage: 0 };
         ONBOARDING.currentQuestion = 0;
+        ONBOARDING.answers = [];
         ONBOARDING.renderStep('name');
     },
 
@@ -40,11 +42,25 @@ const ONBOARDING = {
 
     answerQuiz: (classId) => {
         ONBOARDING.quizScores[classId] = (ONBOARDING.quizScores[classId] || 0) + 1;
+        ONBOARDING.answers.push(classId);
         ONBOARDING.currentQuestion++;
         if (ONBOARDING.currentQuestion >= CHARACTER_QUIZ.length) {
             ONBOARDING.renderStep('class');
         } else {
             ONBOARDING.renderStep('quiz');
+        }
+    },
+
+    prevQuestion: () => {
+        if (ONBOARDING.currentQuestion > 0) {
+            const lastAnswer = ONBOARDING.answers.pop();
+            if (lastAnswer) {
+                ONBOARDING.quizScores[lastAnswer] = Math.max(0, ONBOARDING.quizScores[lastAnswer] - 1);
+            }
+            ONBOARDING.currentQuestion--;
+            ONBOARDING.renderStep('quiz');
+        } else {
+            ONBOARDING.renderStep('name');
         }
     },
 
@@ -141,6 +157,27 @@ const UI_HANDLERS = {
 
     showGuide: () => {
         COMPONENTS.showModal('CÁCH CHƠI LIFE GAME', COMPONENTS.renderGuide());
+    },
+
+    showScreenHelp: (screenId) => {
+        let title = '';
+        let content = '';
+        switch(screenId) {
+            case 'quests':
+                title = 'HƯỚNG DẪN NHIỆM VỤ';
+                content = COMPONENTS.renderQuestsHelp();
+                break;
+            case 'skills':
+                title = 'HƯỚNG DẪN KỸ NĂNG';
+                content = COMPONENTS.renderSkillsHelp();
+                break;
+            case 'analytics':
+                title = 'HƯỚNG DẪN THỐNG KÊ';
+                content = COMPONENTS.renderAnalyticsHelp();
+                break;
+            default: return;
+        }
+        COMPONENTS.showModal(title, content);
     },
 
     // Free class change (no cost) — user can revert class anytime

@@ -45,10 +45,10 @@
                 </header>
 
                 <div class="stats-row">
-                    <div class="stat-card" data-stat="str"><span class="label">STR</span><div class="stat-value">10</div><div class="stat-fill"></div></div>
-                    <div class="stat-card" data-stat="int"><span class="label">INT</span><div class="stat-value">10</div><div class="stat-fill"></div></div>
-                    <div class="stat-card" data-stat="cha"><span class="label">CHA</span><div class="stat-value">10</div><div class="stat-fill"></div></div>
-                    <div class="stat-card" data-stat="wis"><span class="label">WIS</span><div class="stat-value">10</div><div class="stat-fill"></div></div>
+                    <div class="stat-card" data-stat="str"><span class="label">💪 Sức mạnh</span><div class="stat-value">10</div><div class="stat-fill"></div></div>
+                    <div class="stat-card" data-stat="int"><span class="label">🧠 Trí tuệ</span><div class="stat-value">10</div><div class="stat-fill"></div></div>
+                    <div class="stat-card" data-stat="cha"><span class="label">✨ Sức hút</span><div class="stat-value">10</div><div class="stat-fill"></div></div>
+                    <div class="stat-card" data-stat="wis"><span class="label">📚 Thông thái</span><div class="stat-value">10</div><div class="stat-fill"></div></div>
                 </div>
 
                 <section id="journey-preview" class="card-section">
@@ -66,7 +66,7 @@
             <!-- 2. Quests Screen -->
             <section id="quests-screen" class="screen hidden">
                 <div class="screen-header">
-                    <h1>QUEST LOG</h1>
+                    <h1>QUEST LOG <button class="btn-help-mini" onclick="UI_HANDLERS.showScreenHelp('quests')">?</button></h1>
                     <p>Hoàn thành nhiệm vụ để nhận XP và Vàng</p>
                 </div>
 
@@ -92,7 +92,7 @@
             <!-- 3. Skills Screen -->
             <section id="skills-screen" class="screen hidden">
                 <div class="screen-header">
-                    <h1>SKILL TREE</h1>
+                    <h1>SKILL TREE <button class="btn-help-mini" onclick="UI_HANDLERS.showScreenHelp('skills')">?</button></h1>
                     <p>Sử dụng Skill Points để mở khóa Buff</p>
                 </div>
                 <div class="skills-dashboard-header">
@@ -104,7 +104,7 @@
             <!-- 4. Analytics & Achievements Screen -->
             <section id="analytics-screen" class="screen hidden">
                 <div class="screen-header">
-                    <h1>PROGRESS</h1>
+                    <h1>PROGRESS <button class="btn-help-mini" onclick="UI_HANDLERS.showScreenHelp('analytics')">?</button></h1>
                     <p>Phân tích chỉ số và thành tựu</p>
                 </div>
 
