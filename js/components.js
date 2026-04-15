@@ -191,5 +191,72 @@ const COMPONENTS = {
                 </div>
             </div>
         `;
+    },
+
+    // Onboarding Step 1: Enter Name
+    renderNameStep: () => {
+        return `
+            <div class="step-dots">
+                <div class="step-dot active"></div>
+                <div class="step-dot"></div>
+                <div class="step-dot"></div>
+            </div>
+            <p class="step-label">BƯỚC 1 / 3</p>
+            <h1 class="onboarding-title">Bạn tên gì? 👋</h1>
+            <p class="onboarding-subtitle">Đây sẽ là tên nhân vật của bạn trong thế giới Life Game</p>
+            <input type="text" id="player-name-input" class="name-input-large"
+                placeholder="Nhập tên của bạn..."
+                maxlength="20"
+                onkeydown="if(event.key==='Enter') ONBOARDING.submitName()">
+            <button class="premium-btn" style="margin-top:24px" onclick="ONBOARDING.submitName()">Tiếp theo →</button>
+        `;
+    },
+
+    // Onboarding Step 2: Quiz (one question per render)
+    renderQuizStep: (questionIndex, question, total) => {
+        const dotsHTML = Array.from({ length: 3 }, (_, i) =>
+            `<div class="step-dot ${i === 1 ? 'active' : ''}"></div>`
+        ).join('');
+
+        const optionsHTML = question.options.map(opt => `
+            <button class="quiz-option" onclick="ONBOARDING.answerQuiz('${opt.classId}')">
+                ${opt.text}
+            </button>
+        `).join('');
+
+        return `
+            <div class="step-dots">${dotsHTML}</div>
+            <p class="step-label">BƯỚC 2 / 3 &nbsp;•&nbsp; Câu ${questionIndex + 1} / ${total}</p>
+            <h2 class="onboarding-title" style="font-size:1.4rem;line-height:1.4">${question.question}</h2>
+            <div class="quiz-options">${optionsHTML}</div>
+        `;
+    },
+
+    // Onboarding Step 3: Class selection with recommendation
+    renderClassSelect: (classes, recommendedId) => {
+        const recommendedClass = classes.find(c => c.id === recommendedId);
+        const dotsHTML = Array.from({ length: 3 }, (_, i) =>
+            `<div class="step-dot ${i === 2 ? 'active' : ''}"></div>`
+        ).join('');
+
+        const cardsHTML = classes.map(cls => `
+            <div class="class-card ${cls.id === recommendedId ? 'recommended' : ''}"
+                 onclick="ONBOARDING.finalizeClass('${cls.id}')">
+                <span class="class-icon">${cls.icon}</span>
+                <h3>${cls.name}</h3>
+                <p>${cls.description}</p>
+            </div>
+        `).join('');
+
+        return `
+            <div class="step-dots">${dotsHTML}</div>
+            <p class="step-label">BƯỚC 3 / 3</p>
+            <h1 class="onboarding-title">Chọn Class của bạn 🎭</h1>
+            <p class="onboarding-subtitle">
+                Dựa trên bài test, chúng tôi gợi ý <strong style="color:var(--accent)">${recommendedClass.icon} ${recommendedClass.name}</strong>
+                — nhưng bạn hoàn toàn có thể chọn class khác!
+            </p>
+            <div class="class-selection-grid">${cardsHTML}</div>
+        `;
     }
 };

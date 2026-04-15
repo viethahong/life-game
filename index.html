@@ -28,11 +28,9 @@
         </nav>
 
         <main id="main-content">
-            <!-- 0. Onboarding -->
+            <!-- 0. Onboarding (Dynamic steps) -->
             <section id="onboarding" class="screen hidden">
-                <h1 class="premium-heading">CHOOSE YOUR PATH</h1>
-                <p class="subtitle">Bạn là ai trong thế giới này?</p>
-                <div class="class-selection-grid" id="class-grid"></div>
+                <div id="onboarding-step-container" class="onboarding-container"></div>
             </section>
 
             <!-- 1. Home Screen (Dashboard & Journey) -->
@@ -40,6 +38,7 @@
                 <header class="screen-header">
                     <h1 id="char-name">Hero</h1>
                     <p id="char-class-title">Initiate • Level 1</p>
+                    <button class="btn-change-class" onclick="UI_HANDLERS.changeClass()">🔄 Đổi Class</button>
                 </header>
 
                 <div class="stats-row">

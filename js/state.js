@@ -19,28 +19,77 @@ const CHARACTER_CLASSES = [
         name: 'Creator',
         icon: '🧙',
         description: 'Tập trung vào sự sáng tạo, nội dung và gây ảnh hưởng.',
-        baseStats: { str: 5, int: 12, cha: 15, wis: 8, dex: 10, con: 5 }
+        baseStats: { str: 5, int: 12, cha: 15, wis: 8 }
     },
     {
         id: 'warrior',
         name: 'Warrior',
         icon: '⚔️',
         description: 'Bản lĩnh thực chiến, khả năng đàm phán và bán hàng đỉnh cao.',
-        baseStats: { str: 12, int: 8, cha: 10, wis: 10, dex: 8, con: 12 }
+        baseStats: { str: 15, int: 8, cha: 10, wis: 7 }
     },
     {
         id: 'merchant',
         name: 'Merchant',
         icon: '💰',
         description: 'Tối ưu hóa dòng tiền, đầu tư và xây dựng hệ thống bền vững.',
-        baseStats: { str: 6, int: 10, cha: 12, wis: 15, dex: 7, con: 5 }
+        baseStats: { str: 6, int: 10, cha: 12, wis: 12 }
     },
     {
         id: 'sage',
         name: 'Sage',
         icon: '🔮',
         description: 'Chuyên gia tư vấn, huấn luyện và phát triển trí tuệ chuyên sâu.',
-        baseStats: { str: 4, int: 18, cha: 8, wis: 12, dex: 5, con: 8 }
+        baseStats: { str: 4, int: 18, cha: 8, wis: 10 }
+    }
+];
+
+// Bộ câu hỏi xác định phong cách
+const CHARACTER_QUIZ = [
+    {
+        question: 'Bạn thấy mình giỏi nhất ở điều gì khi kiếm tiền?',
+        options: [
+            { text: '🎨 Tạo nội dung, xây dựng thương hiệu cá nhân', classId: 'creator' },
+            { text: '🤝 Bán hàng, thuyết phục và đàm phán trực tiếp', classId: 'warrior' },
+            { text: '📊 Đầu tư, quản lý dòng tiền, xây hệ thống', classId: 'merchant' },
+            { text: '📚 Tư vấn chuyên sâu, nghiên cứu, chia sẻ kiến thức', classId: 'sage' },
+        ]
+    },
+    {
+        question: 'Bạn làm việc hiệu quả nhất theo phong cách nào?',
+        options: [
+            { text: '🎵 Tự do sáng tạo, không bị ràng buộc quy trình', classId: 'creator' },
+            { text: '🚀 Áp lực cao, mục tiêu rõ ràng, thấy kết quả ngay', classId: 'warrior' },
+            { text: '📋 Có kế hoạch chi tiết, tracking số liệu thường xuyên', classId: 'merchant' },
+            { text: '🔬 Đào sâu một vấn đề cho đến khi hiểu thấu đáo', classId: 'sage' },
+        ]
+    },
+    {
+        question: 'Nếu có 100 triệu nhàn rỗi, bạn sẽ làm gì đầu tiên?',
+        options: [
+            { text: '🖥️ Đầu tư vào bản thân: học, thiết bị, xây brand', classId: 'creator' },
+            { text: '🏢 Mở rộng kinh doanh, tuyển người, chiếm thị phần', classId: 'warrior' },
+            { text: '📈 Đầu tư sinh lời: cổ phiếu, bất động sản, thụ động', classId: 'merchant' },
+            { text: '🎓 Học thêm chuyên môn sâu, nghiên cứu dài hạn', classId: 'sage' },
+        ]
+    },
+    {
+        question: 'Người xung quanh hay khen bạn điều gì nhất?',
+        options: [
+            { text: '✨ Sáng tạo, có gu, truyền cảm hứng tốt', classId: 'creator' },
+            { text: '💪 Quyết đoán, bản lĩnh, không chịu bỏ cuộc', classId: 'warrior' },
+            { text: '🧮 Tỉnh táo, nhạy bén với số, biết tính toán', classId: 'merchant' },
+            { text: '🧠 Thông minh, hiểu sâu vấn đề, cho lời khuyên chất', classId: 'sage' },
+        ]
+    },
+    {
+        question: 'Mục tiêu lớn nhất trong 5 năm tới của bạn là gì?',
+        options: [
+            { text: '🌟 Xây dựng thương hiệu cá nhân, được biết đến rộng rãi', classId: 'creator' },
+            { text: '🏆 Dẫn đầu thị trường, trở thành số 1 trong lĩnh vực', classId: 'warrior' },
+            { text: '🏖️ Đạt tự do tài chính, có thu nhập thụ động ổn định', classId: 'merchant' },
+            { text: '🎖️ Trở thành chuyên gia được kính trọng và tìm kiếm', classId: 'sage' },
+        ]
     }
 ];
 
