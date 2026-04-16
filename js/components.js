@@ -97,34 +97,42 @@ const COMPONENTS = {
     },
 
     // Phase 2: Render Journey Map
-    renderJourneyMap: (level) => {
+    renderJourneyMap: () => {
         const container = document.getElementById('journey-milestones');
         const progressBar = document.getElementById('journey-progress-bar');
         const char = GAME_STATE.character;
         
         // Use the rankName calculated by Engine Assessment
-        document.getElementById('rank-name').textContent = char.rankName || 'Apprentice';
+        document.getElementById('rank-name').textContent = char.rankName || 'Tập sự';
         
-        // Determine the "Effective Level" - you are only as strong as your weakest link (including XP level)
+        // 1. Calculate lowest 4T stat
         const statsObj = [
-            { label: 't1', val: char.stats.t1 || 0 },
-            { label: 't2', val: char.stats.t2 || 0 },
-            { label: 't3', val: char.stats.t3 || 0 },
-            { label: 't4', val: (char.gold / 1000000) || 0 }
+            { id: 't1', val: char.stats.t1 || 0 },
+            { id: 't2', val: char.stats.t2 || 0 },
+            { id: 't3', val: char.stats.t3 || 0 },
+            { id: 't4', val: (char.gold / 1000000) || 0 }
         ];
         const lowestObj = statsObj.reduce((prev, curr) => (prev.val < curr.val) ? prev : curr);
         
-        // Effective Level is the minimum of XP Level and the lowest 4T stat
-        const effectiveLevel = Math.min(char.level, lowestObj.val);
-        const progress = Math.min((effectiveLevel / 100) * 100, 100);
+        // 2. Calculate Granular XP Level
+        const xpRequired = PROGRESSION.getXPRequired(char.level);
+        const xpProgress = char.xp / xpRequired;
+        const preciseLevel = char.level + xpProgress;
         
-        progressBar.style.setProperty('--progress', `${progress}%`);
+        // 3. Determine Effective Level (Bottleneck)
+        // The bar "runs" with XP, but is capped by the lowest 4T stat
+        const effectiveLevel = Math.min(preciseLevel, lowestObj.val);
+        const progressPercent = Math.min(effectiveLevel, 100);
         
+        progressBar.style.setProperty('--progress', `${progressPercent}%`);
+        
+        // 4. Render Milestones
         container.innerHTML = '';
         RANKS.forEach(rank => {
             const milestone = document.createElement('div');
-            // Milestone is reached only if effective level hits the rank level
-            milestone.className = `milestone ${effectiveLevel >= rank.level ? 'reached' : ''}`;
+            // FIX: Use Math.floor to ensure we only light up the milestone once the full level is reached
+            const isReached = Math.floor(effectiveLevel) >= rank.level;
+            milestone.className = `milestone ${isReached ? 'reached' : ''}`;
             milestone.style.left = `${rank.level}%`;
             milestone.innerHTML = `
                 <div class="milestone-dot"></div>
@@ -133,7 +141,7 @@ const COMPONENTS = {
             container.appendChild(milestone);
         });
 
-        // Add bottleneck indicator
+        // 5. Update Bottleneck Message
         const statLabels = { t1: 'Tài năng (T1)', t2: 'Tín nhiệm (T2)', t3: 'Tiếng tăm (T3)', t4: 'Tài chính (T4)' };
         let bottleneckMsg = document.getElementById('bottleneck-indicator');
         if (!bottleneckMsg) {
@@ -143,10 +151,13 @@ const COMPONENTS = {
             container.parentNode.appendChild(bottleneckMsg);
         }
 
-        if (char.level < lowestObj.val) {
-            bottleneckMsg.innerHTML = `⚠️ Nút thắt hiện tại: <span style="color:var(--accent)">Cấp độ (XP)</span> (Cần làm thêm nhiệm vụ để lên cấp)`;
+        if (preciseLevel < lowestObj.val) {
+            const remainingXP = Math.ceil(xpRequired - char.xp);
+            bottleneckMsg.innerHTML = `⚠️ Nút thắt hiện tại: <span style="color:var(--accent)">Cấp độ (XP)</span>. Cần thêm <b>${remainingXP} XP</b> để tiếp tục hành trình.`;
         } else {
-            bottleneckMsg.innerHTML = `⚠️ Nút thắt hiện tại: <span style="color:var(--accent)">${statLabels[lowestObj.label]}</span> (Cần nâng chỉ số này để tiến hành trình)`;
+            const rankInfo = PROGRESSION.getRankInfoByStat(lowestObj.val);
+            const nextThreshold = rankInfo.nextRank ? rankInfo.nextRank.level : 'MAX';
+            bottleneckMsg.innerHTML = `⚠️ Nút thắt hiện tại: <span style="color:var(--accent)">${statLabels[lowestObj.id]}</span>. Cần đạt mốc <b>${nextThreshold}</b> để thăng cấp.`;
         }
     },
 
