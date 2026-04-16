@@ -107,9 +107,14 @@ const ENGINE = {
             { id: 't4', val: t4Value }
         ];
 
-        // Rank is limited by the LOWEST of (XP Level OR lowest 4T stat)
-        const lowestStatValue = Math.min(...stats.map(s => s.val));
-        const effectiveRankLevel = Math.min(char.level, lowestStatValue);
+        // Rank is limited by the LOWEST of (XP Level OR lowest 4T stat - excluding T4 money)
+        const coreStats = [
+            char.stats.t1 || 0,
+            char.stats.t2 || 0,
+            char.stats.t3 || 0
+        ];
+        const lowestStatValue = Math.min(...coreStats);
+        const effectiveRankLevel = Math.min(char.level, Math.floor(lowestStatValue));
         
         // Determine Rank based on effectiveRankLevel thresholds
         const rankInfo = PROGRESSION.getRankInfoByStat(effectiveRankLevel);

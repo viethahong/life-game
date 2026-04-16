@@ -105,12 +105,11 @@ const COMPONENTS = {
         // Use the rankName calculated by Engine Assessment
         document.getElementById('rank-name').textContent = char.rankName || 'Tập sự';
         
-        // 1. Calculate lowest 4T stat
+        // 1. Calculate lowest 4T stat (Excluding T4)
         const statsObj = [
             { id: 't1', val: char.stats.t1 || 0 },
             { id: 't2', val: char.stats.t2 || 0 },
-            { id: 't3', val: char.stats.t3 || 0 },
-            { id: 't4', val: (char.gold / 1000000) || 0 }
+            { id: 't3', val: char.stats.t3 || 0 }
         ];
         const lowestObj = statsObj.reduce((prev, curr) => (prev.val < curr.val) ? prev : curr);
         

@@ -48,11 +48,11 @@ const UI_MANAGER = {
         if (UI_MANAGER.currentScreen === 'home') {
             document.getElementById('char-name').textContent = char.name;
             
-            // Luôn tính toán Rank mới nhất theo tiếng Việt dựa trên chỉ số thấp nhất (Nguyên lý Thùng gỗ)
-            const t4Value = (char.gold || 0) / 1000000;
-            const stats = [char.stats.t1 || 0, char.stats.t2 || 0, char.stats.t3 || 0, t4Value];
+            // Luôn tính toán Rank mới nhất theo tiếng Việt dựa trên chỉ số thấp nhất (T1, T2, T3)
+            const stats = [char.stats.t1 || 0, char.stats.t2 || 0, char.stats.t3 || 0];
             const lowestStat = Math.min(...stats);
-            const rankInfo = PROGRESSION.getRankInfoByStat(lowestStat);
+            const effectiveLevelCap = Math.min(char.level, Math.floor(lowestStat));
+            const rankInfo = PROGRESSION.getRankInfoByStat(effectiveLevelCap);
             const rankName = rankInfo.currentRank.name;
             
             document.getElementById('char-class-title').textContent = `${char.classIcon || ''} ${char.className} • Cấp độ ${char.level} • ${rankName}`;
@@ -63,11 +63,18 @@ const UI_MANAGER = {
                 let value = 0;
                 if (statType === 'ps') {
                     value = ENGINE.calculatePowerScore();
+                } else if (statType === 't4') {
+                    value = (char.gold || 0) / 1000000;
                 } else {
                     value = char.stats[statType] || 0;
                 }
-                card.querySelector('.stat-value').textContent = value;
+                
+                // Round to 1 decimal place
+                const displayValue = typeof value === 'number' ? value.toFixed(1) : value;
+                card.querySelector('.stat-value').textContent = displayValue.toString().endsWith('.0') ? Math.floor(value) : displayValue;
+                
                 if (statType !== 'ps') {
+                    // Progress bar fill based on value
                     card.querySelector('.stat-fill').style.width = `${Math.min(value * 2, 100)}%`;
                 }
             });

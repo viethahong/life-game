@@ -202,9 +202,15 @@ const UI_HANDLERS = {
                         <span class="icon">📢</span>
                         <span class="label">TIẾNG TĂM (T3)</span>
                     </div>
-                </div>
+            <div style="margin: 20px 0; border-top: 1px solid var(--border); padding-top: 20px;">
+                <button class="premium-btn w-full" onclick="document.getElementById('modal-save-btn').click()" style="width: 100%;">
+                    💾 LƯU NHIỆM VỤ NÀY
+                </button>
             </div>
-            ${COMPONENTS.renderPresetPicker(GAME_STATE.character.classId)}`;
+            <div style="margin-top: 20px; opacity: 0.8;">
+                <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 10px;">HOẶC CHỌN NHIỆM VỤ MẪU:</p>
+                ${COMPONENTS.renderPresetPicker(GAME_STATE.character.classId)}
+            </div>`;
             
         COMPONENTS.showModal('THÊM NHIỆM VỤ', html, () => {
             const title = document.getElementById('q-title').value;
