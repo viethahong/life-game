@@ -1154,3 +1154,47 @@ body.modal-open #bottom-nav {
 .stat-toggle-btn.active .label { color: var(--accent); }
 .stat-toggle-btn.active .icon { transform: scale(1.1); transition: 0.2s; }
 
+/* Reinvestment UI Enhancements */
+.reinvest-action-btn {
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.reinvest-action-btn:hover {
+    transform: translateY(-4px) scale(1.05);
+    background: var(--bg-elevated);
+    border-color: var(--accent);
+    box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2);
+}
+
+.reinvest-action-btn:active {
+    transform: scale(0.95);
+    background: var(--accent);
+    color: white;
+}
+
+.btn-success-flash {
+    animation: success-flash 0.5s ease-out;
+}
+
+@keyframes success-flash {
+    0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.6); }
+    70% { box-shadow: 0 0 0 15px rgba(79, 70, 229, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+}
+
+.floating-feedback {
+    position: fixed;
+    pointer-events: none;
+    z-index: 10000;
+    font-weight: 800;
+    font-size: 1.1rem;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    animation: float-up-fade 1s ease-out forwards;
+    white-space: nowrap;
+}
+
+@keyframes float-up-fade {
+    0% { transform: translate(-50%, 0); opacity: 1; }
+    100% { transform: translate(-50%, -60px); opacity: 0; }
+}
+

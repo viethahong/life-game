@@ -70,14 +70,14 @@ const ENGINE = {
         const char = GAME_STATE.character;
         const cost = ENGINE.calculateReinvestCost(char.level);
 
-        // --- CEILING LOGIC: Action-First Constraint ---
-        // Chỉ có thể cộng vào 2 chỉ số thấp hơn cho đến khi nào bằng hoặc nhỏ hơn gần bằng chỉ số cao nhất
-        const coreStats = [char.stats.t1 || 0, char.stats.t2 || 0, char.stats.t3 || 0];
-        const maxStatValue = Math.max(...coreStats);
-        const currentVal = char.stats[targetStat] || 0;
+        // Action-First Constraint: Money only catches up to your highest stat
+        const t1 = char.stats.t1 || 0;
+        const t2 = char.stats.t2 || 0;
+        const t3 = char.stats.t3 || 0;
+        const maxStat = Math.max(t1, t2, t3);
 
-        if (currentVal >= maxStatValue && coreStats.some(v => v < maxStatValue)) {
-            return { success: false, reason: 'ceiling_reached', maxStat: maxStatValue };
+        if (char.stats[targetStat] >= maxStat) {
+            return { success: false, reason: 'ceiling_reached', maxStat };
         }
 
         if (char.gold >= cost) {
@@ -89,16 +89,20 @@ const ENGINE = {
             if (!GAME_STATE.history.gold) GAME_STATE.history.gold = [];
             GAME_STATE.history.gold.push({ date, amount: -cost, note: `Reinvest ${targetStat}` });
 
-            // Small XP Reward for reinvesting (Action reinforcement)
-            const xpAward = Math.floor(cost / 100000); // 1 pt = 10 XP
+            // Award XP based on the cost of reinvestment (e.g., 1M -> 100 XP)
+            const xpAward = Math.floor(cost / 10000);
             ENGINE.addXP(xpAward);
 
             PERSISTENCE.save();
             UI_MANAGER.updateUI();
+            UI_MANAGER.showStatGainToast(targetStat, 1);
             
-            return { success: true, xpAward };
+            // Re-assess after stat change
+            ENGINE.autoAssess();
+            return { success: true, xpAward, cost };
         } else {
-            return { success: false, reason: 'insufficient_funds', cost: cost };
+            console.log(`Bạn không đủ tiền! Cần ${cost.toLocaleString('vi-VN')} VNĐ.`);
+            return { success: false, cost };
         }
     },
 
@@ -110,6 +114,13 @@ const ENGINE = {
         // T4 = gold / 1,000,000 (1M = 1 pt)
         const t4Value = char.gold / 1000000; 
         
+        const stats = [
+            { id: 't1', val: char.stats.t1 || 0 },
+            { id: 't2', val: char.stats.t2 || 0 },
+            { id: 't3', val: char.stats.t3 || 0 },
+            { id: 't4', val: t4Value }
+        ];
+
         // Rank is limited by the LOWEST of (XP Level OR lowest 4T stat - excluding T4 money)
         const coreStats = [
             char.stats.t1 || 0,

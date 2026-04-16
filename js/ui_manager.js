@@ -19,6 +19,20 @@ const UI_MANAGER = {
         UI_MANAGER.updateUI();
     },
 
+    // --- UI FEEDBACK ---
+    showFloatingText: (text, x, y, color) => {
+        const el = document.createElement('div');
+        el.className = 'floating-feedback';
+        el.textContent = text;
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+        el.style.color = color || 'white';
+        document.body.appendChild(el);
+        
+        // Remove after animation completes
+        setTimeout(() => el.remove(), 1000);
+    },
+
     showOnboarding: () => {
         document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
         document.getElementById('onboarding').classList.remove('hidden');
@@ -46,11 +60,7 @@ const UI_MANAGER = {
         document.getElementById('nav-xp-progress').style.width = `${xpPercent}%`;
 
         if (UI_MANAGER.currentScreen === 'home') {
-            const charName = document.getElementById('char-name');
-            const classTitle = document.getElementById('char-class-title');
-            const rankBadge = document.getElementById('rank-name');
-
-            if (charName) charName.textContent = char.name;
+            document.getElementById('char-name').textContent = char.name;
             
             // Luôn tính toán Rank mới nhất theo tiếng Việt dựa trên chỉ số thấp nhất (T1, T2, T3)
             const stats = [char.stats.t1 || 0, char.stats.t2 || 0, char.stats.t3 || 0];
@@ -59,8 +69,8 @@ const UI_MANAGER = {
             const rankInfo = PROGRESSION.getRankInfoByStat(effectiveLevelCap);
             const rankName = rankInfo.currentRank.name;
             
-            if (classTitle) classTitle.textContent = `${char.classIcon || ''} ${char.className} • Cấp độ ${char.level} • ${rankName}`;
-            if (rankBadge) rankBadge.textContent = rankName;
+            document.getElementById('char-class-title').textContent = `${char.classIcon || ''} ${char.className} • Cấp độ ${char.level} • ${rankName}`;
+            document.getElementById('rank-name').textContent = rankName;
 
             document.querySelectorAll('.stat-card').forEach(card => {
                 const statType = card.dataset.stat;
@@ -73,26 +83,18 @@ const UI_MANAGER = {
                     value = char.stats[statType] || 0;
                 }
                 
-                const valEl = card.querySelector('.stat-value');
-                const fillEl = card.querySelector('.stat-fill');
+                // Round to 1 decimal place
+                const displayValue = typeof value === 'number' ? value.toFixed(1) : value;
+                card.querySelector('.stat-value').textContent = displayValue.toString().endsWith('.0') ? Math.floor(value) : displayValue;
                 
-                if (valEl) {
-                    // Round to 1 decimal place
-                    const displayValue = typeof value === 'number' ? value.toFixed(1) : value;
-                    valEl.textContent = displayValue.toString().endsWith('.0') ? Math.floor(value) : displayValue;
-                }
-                
-                if (fillEl && statType !== 'ps') {
-                    fillEl.style.width = `${Math.min(value * 2, 100)}%`;
+                if (statType !== 'ps') {
+                    // Progress bar fill based on value
+                    card.querySelector('.stat-fill').style.width = `${Math.min(value * 2, 100)}%`;
                 }
             });
-
-            // Journey Map
-            if (document.getElementById('journey-milestones')) {
-                COMPONENTS.renderJourneyMap(char.level);
-            }
+            COMPONENTS.renderJourneyMap(char.level);
             
-            // Home Guide
+            // Render Home Guide
             const guideContainer = document.getElementById('home-guide');
             if (guideContainer) {
                 guideContainer.innerHTML = COMPONENTS.renderHomeGuide();

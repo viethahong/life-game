@@ -178,18 +178,5 @@
     <script src="js/engine.js"></script>
     <script src="js/ui_manager.js"></script>
     <script src="js/app.js"></script>
-
-    <!-- Emergency Rescue Script -->
-    <script>
-        // Force hide loader after 2s if it's still there
-        setTimeout(() => {
-            const loader = document.getElementById('app-loading-screen');
-            if (loader) {
-                console.warn("Rescue: Force-hiding loading screen due to delay.");
-                loader.style.opacity = '0';
-                setTimeout(() => loader.remove(), 500);
-            }
-        }, 2000);
-    </script>
 </body>
 </html>
