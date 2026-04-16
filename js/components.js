@@ -276,10 +276,10 @@ const COMPONENTS = {
                 <h2>${title}</h2>
                 <button class="btn-close" onclick="UI_MANAGER.closeModal()">✕</button>
             </div>
-            <div class="modal-body">${contentHTML}</div>
-            <div class="modal-footer">
+            <div class="modal-footer" style="padding-bottom: 0; margin-bottom: -10px; border-bottom: none;">
                 <button class="premium-btn" id="modal-save-btn">Lưu Lại</button>
             </div>
+            <div class="modal-body">${contentHTML}</div>
         `;
         
         overlay.classList.remove('hidden');

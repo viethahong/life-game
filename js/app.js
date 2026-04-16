@@ -188,7 +188,7 @@ const UI_HANDLERS = {
                 <option value="E">E (Dễ - 10 XP)</option><option value="D">D (20 XP)</option><option value="C" selected>C (Trung bình - 50 XP)</option>
                 <option value="B">B (100 XP)</option><option value="A">A (Khó - 250 XP)</option><option value="S">S (Siêu khó - 1000 XP)</option>
             </select></div>
-            <div class="form-group"><label>Chỉ số phát triển (Chọn 1 hoặc nhiều)</label>
+             <div class="form-group"><label>Chỉ số phát triển (Chọn 1 hoặc nhiều)</label>
                 <div class="stat-toggle-group">
                     <div class="stat-toggle-btn active" data-type="t1" onclick="this.classList.toggle('active')">
                         <span class="icon">🧠</span>
@@ -202,15 +202,9 @@ const UI_HANDLERS = {
                         <span class="icon">📢</span>
                         <span class="label">TIẾNG TĂM (T3)</span>
                     </div>
-            <div style="margin: 20px 0; border-top: 1px solid var(--border); padding-top: 20px;">
-                <button class="premium-btn w-full" onclick="document.getElementById('modal-save-btn').click()" style="width: 100%;">
-                    💾 LƯU NHIỆM VỤ NÀY
-                </button>
+                </div>
             </div>
-            <div style="margin-top: 20px; opacity: 0.8;">
-                <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 10px;">HOẶC CHỌN NHIỆM VỤ MẪU:</p>
-                ${COMPONENTS.renderPresetPicker(GAME_STATE.character.classId)}
-            </div>`;
+            ${COMPONENTS.renderPresetPicker(GAME_STATE.character.classId)}`;
             
         COMPONENTS.showModal('THÊM NHIỆM VỤ', html, () => {
             const title = document.getElementById('q-title').value;
