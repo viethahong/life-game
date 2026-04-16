@@ -1,0 +1,30 @@
+{
+  "creator": [
+    { "title": "Quay 1 video ngắn chia sẻ giá trị", "difficulty": "B", "types": ["t3"] },
+    { "title": "Viết 1 bài post truyền cảm hứng lên MXH", "difficulty": "C", "types": ["t3"] },
+    { "title": "Thiết kế bộ nhận diện/hình ảnh mới", "difficulty": "C", "types": ["t1"] },
+    { "title": "Phản hồi 10 bình luận của fan/người theo dõi", "difficulty": "D", "types": ["t2"] },
+    { "title": "Học 1 kỹ năng thiết kế/video mới trong 1h", "difficulty": "C", "types": ["t1"] }
+  ],
+  "warrior": [
+    { "title": "Hoàn thành 4 chu kỳ Pomodoro làm việc sâu", "difficulty": "B", "types": ["t1"] },
+    { "title": "Tập thể dục cường độ cao trong 30 phút", "difficulty": "C", "types": ["t1"] },
+    { "title": "Giải quyết 1 vấn đề tồn đọng từ tuần trước", "difficulty": "A", "types": ["t1"] },
+    { "title": "Xử lý sạch 100% email/tin nhắn đến", "difficulty": "C", "types": ["t2"] },
+    { "title": "Đọc 20 trang sách về phát triển bản thân", "difficulty": "D", "types": ["t1"] }
+  ],
+  "merchant": [
+    { "title": "Gửi báo giá cho 3 khách hàng tiềm năng", "difficulty": "B", "types": ["t2"] },
+    { "title": "Tư vấn chốt deal thành công 1 hợp đồng", "difficulty": "A", "types": ["t2", "t3"] },
+    { "title": "Kiểm tra dòng tiền & tối ưu chi phí tháng", "difficulty": "C", "types": ["t1"] },
+    { "title": "Hẹn gặp 1 đối tác mới mở rộng mạng lưới", "difficulty": "B", "types": ["t2", "t3"] },
+    { "title": "Đăng bài quảng bá dịch vụ/sản phẩm", "difficulty": "C", "types": ["t3"] }
+  ],
+  "sage": [
+    { "title": "Nghiên cứu 1 chủ đề mới trong 2h", "difficulty": "B", "types": ["t1"] },
+    { "title": "Viết 1 bài phân tích chuyên sâu về thị trường", "difficulty": "B", "types": ["t1", "t3"] },
+    { "title": "Tư vấn giải đáp thắc mắc cho 1 khách hàng", "difficulty": "C", "types": ["t2"] },
+    { "title": "Dành 30p thiền & lập kế hoạch chiến lược", "difficulty": "D", "types": ["t1"] },
+    { "title": "Học thêm 1 chứng chỉ chuyên môn", "difficulty": "B", "types": ["t1"] }
+  ]
+}

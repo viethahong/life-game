@@ -1,23 +1,24 @@
 // =============================================
-// ONBOARDING FLOW (3 steps)
+// ONBOARDING FLOW
 // =============================================
 const ONBOARDING = {
     playerName: '',
     quizScores: { creator: 0, warrior: 0, merchant: 0, sage: 0 },
     currentQuestion: 0,
-    answers: [], // Lưu lại lịch sử classId để có thể lùi lại
+    answers: [],
 
     start: () => {
         ONBOARDING.playerName = '';
         ONBOARDING.quizScores = { creator: 0, warrior: 0, merchant: 0, sage: 0 };
         ONBOARDING.currentQuestion = 0;
-        ONBOARDING.answers = [];
-        ONBOARDING.renderStep('name');
+        ONBOARDING.renderStep('welcome');
     },
 
     renderStep: (step) => {
         const container = document.getElementById('onboarding-step-container');
-        if (step === 'name') {
+        if (step === 'welcome') {
+            container.innerHTML = COMPONENTS.renderWelcomeStep();
+        } else if (step === 'name') {
             container.innerHTML = COMPONENTS.renderNameStep();
             document.getElementById('player-name-input').focus();
         } else if (step === 'quiz') {
@@ -32,49 +33,34 @@ const ONBOARDING = {
     submitName: () => {
         const input = document.getElementById('player-name-input');
         const name = input ? input.value.trim() : '';
-        if (!name) {
-            input.style.borderColor = '#ef4444';
-            return;
-        }
+        if (!name) return;
         ONBOARDING.playerName = name;
         ONBOARDING.renderStep('quiz');
     },
 
     answerQuiz: (classId) => {
-        ONBOARDING.quizScores[classId] = (ONBOARDING.quizScores[classId] || 0) + 1;
+        ONBOARDING.quizScores[classId]++;
         ONBOARDING.answers.push(classId);
         ONBOARDING.currentQuestion++;
-        if (ONBOARDING.currentQuestion >= CHARACTER_QUIZ.length) {
-            ONBOARDING.renderStep('class');
-        } else {
-            ONBOARDING.renderStep('quiz');
-        }
+        if (ONBOARDING.currentQuestion >= CHARACTER_QUIZ.length) ONBOARDING.renderStep('class');
+        else ONBOARDING.renderStep('quiz');
     },
 
     prevQuestion: () => {
         if (ONBOARDING.currentQuestion > 0) {
-            const lastAnswer = ONBOARDING.answers.pop();
-            if (lastAnswer) {
-                ONBOARDING.quizScores[lastAnswer] = Math.max(0, ONBOARDING.quizScores[lastAnswer] - 1);
-            }
+            const last = ONBOARDING.answers.pop();
+            ONBOARDING.quizScores[last]--;
             ONBOARDING.currentQuestion--;
             ONBOARDING.renderStep('quiz');
-        } else {
-            ONBOARDING.renderStep('name');
-        }
+        } else ONBOARDING.renderStep('name');
     },
 
-    getRecommendedClass: () => {
-        return Object.entries(ONBOARDING.quizScores)
-            .sort((a, b) => b[1] - a[1])[0][0];
-    },
+    getRecommendedClass: () => Object.entries(ONBOARDING.quizScores).sort((a,b)=>b[1]-a[1])[0][0],
 
     finalizeClass: (classId) => {
         const cls = CHARACTER_CLASSES.find(c => c.id === classId);
-        const displayName = ONBOARDING.playerName || 'Hero';
-
         GAME_STATE.character = {
-            name: displayName,
+            name: ONBOARDING.playerName || 'Hero',
             classId: cls.id,
             className: cls.name,
             classIcon: cls.icon,
@@ -82,363 +68,224 @@ const ONBOARDING = {
             xp: 0,
             gold: 0,
             sp: 1,
-            stats: { ...cls.baseStats }
+            stats: { ...cls.baseStats },
+            streak: 0,
+            streakLastDay: '',
+            rankName: 'Apprentice'
         };
-        GAME_STATE.history = { xp: [], gold: [] };
-        GAME_STATE.skills = [];
-        GAME_STATE.achievements = [];
-
+        ENGINE.autoAssess();
         PERSISTENCE.save();
-        UI_HANDLERS.showDashboard();
-        UI_HANDLERS.showGuide();
+        UI_MANAGER.showDashboard();
     }
 };
 
 // =============================================
-// MAIN APPLICATION ORCHESTRATOR
+// MAIN UI HANDLERS (Bridge between UI and Engine)
 // =============================================
 const UI_HANDLERS = {
-    charts: { xp: null, radar: null },
-    currentScreen: 'home',
-
-    // Initial App Load
     init: () => {
         const hasData = PERSISTENCE.load();
-        
         if (!hasData || !GAME_STATE.character) {
-            UI_HANDLERS.showOnboarding();
+            UI_MANAGER.showOnboarding();
         } else {
-            UI_HANDLERS.showDashboard();
-            if (!localStorage.getItem('LIFE_GAME_GUIDE_SEEN')) {
-                UI_HANDLERS.showGuide();
-                localStorage.setItem('LIFE_GAME_GUIDE_SEEN', 'true');
-            }
+            UI_MANAGER.showDashboard();
         }
-        
-        UI_HANDLERS.setupBottomNav();
         UI_HANDLERS.setupGlobalEvents();
-    },
+        UI_MANAGER.updateUI();
+        
+        // Loader finish
+        setTimeout(() => {
+            const l = document.getElementById('app-loading-screen');
+            if(l) { l.style.opacity = '0'; setTimeout(() => l.remove(), 500); }
+        }, 500);
 
-    setupBottomNav: () => {
-        document.querySelectorAll('.nav-item').forEach(btn => {
-            btn.onclick = () => UI_HANDLERS.switchScreen(btn.dataset.screen);
-        });
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW reg failed:', err));
+            });
+        }
     },
 
     setupGlobalEvents: () => {
-        document.getElementById('help-btn').onclick = UI_HANDLERS.showGuide;
+        document.querySelectorAll('.nav-item').forEach(btn => {
+            btn.onclick = () => UI_MANAGER.switchScreen(btn.dataset.screen);
+        });
         document.getElementById('add-quest-btn').onclick = UI_HANDLERS.addQuest;
         document.getElementById('add-income-btn').onclick = UI_HANDLERS.addIncome;
+        document.getElementById('reset-btn').onclick = PERSISTENCE.reset;
     },
 
-    switchScreen: (screenId) => {
-        UI_HANDLERS.currentScreen = screenId;
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.toggle('active', item.dataset.screen === screenId);
-        });
-        document.querySelectorAll('.screen').forEach(screen => screen.classList.add('hidden'));
-        document.getElementById(`${screenId}-screen`).classList.remove('hidden');
-        if (screenId === 'analytics') UI_HANDLERS.initCharts();
-        UI_HANDLERS.updateUI();
-    },
-
-    showOnboarding: () => {
-        document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-        document.getElementById('onboarding').classList.remove('hidden');
-        document.getElementById('bottom-nav').classList.add('hidden');
-        ONBOARDING.start();
-    },
-
-    showDashboard: () => {
-        document.getElementById('onboarding').classList.add('hidden');
-        document.getElementById('bottom-nav').classList.remove('hidden');
-        UI_HANDLERS.switchScreen('home');
-    },
-
-    showGuide: () => {
-        COMPONENTS.showModal('CÁCH CHƠI LIFE GAME', COMPONENTS.renderGuide());
-    },
-
-    showScreenHelp: (screenId) => {
-        let title = '';
-        let content = '';
-        switch(screenId) {
-            case 'quests':
-                title = 'HƯỚNG DẪN NHIỆM VỤ';
-                content = COMPONENTS.renderQuestsHelp();
-                break;
-            case 'skills':
-                title = 'HƯỚNG DẪN KỸ NĂNG';
-                content = COMPONENTS.renderSkillsHelp();
-                break;
-            case 'analytics':
-                title = 'HƯỚNG DẪN THỐNG KÊ';
-                content = COMPONENTS.renderAnalyticsHelp();
-                break;
-            default: return;
+    // Quests & Income
+    toggleQuest: (index) => {
+        const q = GAME_STATE.quests[index];
+        q.completed = !q.completed;
+        if (q.completed) {
+            ENGINE.addXP(q.xp);
+            const reward = (QUEST_CONFIG.REWARDS[q.difficulty] || 0.5) / q.types.length;
+            q.types.forEach(t => GAME_STATE.character.stats[t] += reward);
+            UI_MANAGER.showStatGainToast(q.types, reward);
+        } else {
+            ENGINE.addXP(-q.xp);
+            const reward = (QUEST_CONFIG.REWARDS[q.difficulty] || 0.5) / q.types.length;
+            q.types.forEach(t => GAME_STATE.character.stats[t] = Math.max(0, GAME_STATE.character.stats[t] - reward));
         }
-        COMPONENTS.showModal(title, content);
-    },
-
-    // Free class change (no cost) — user can revert class anytime
-    changeClass: () => {
-        const cardsHTML = CHARACTER_CLASSES.map(cls => `
-            <div class="class-card ${GAME_STATE.character.classId === cls.id ? 'recommended' : ''}"
-                 onclick="UI_HANDLERS.doChangeClass('${cls.id}')"
-                 style="cursor:pointer">
-                <span class="class-icon">${cls.icon}</span>
-                <h3>${cls.name}</h3>
-                <p>${cls.description}</p>
-            </div>
-        `).join('');
-
-        COMPONENTS.showModal('ĐỔI CLASS NHÂN VẬT', `
-            <p style="color:var(--text-dim);margin-bottom:20px;font-size:0.9rem">
-                Class hiện tại của bạn được đánh dấu. Level và Gold sẽ được giữ nguyên khi đổi.
-            </p>
-            <div class="class-selection-grid">${cardsHTML}</div>
-        `);
-    },
-
-    doChangeClass: (classId) => {
-        const cls = CHARACTER_CLASSES.find(c => c.id === classId);
-        if (!cls || !GAME_STATE.character) return;
-        GAME_STATE.character.classId = cls.id;
-        GAME_STATE.character.className = cls.name;
-        GAME_STATE.character.classIcon = cls.icon;
-        GAME_STATE.character.stats = { ...cls.baseStats };
         PERSISTENCE.save();
-        UI_HANDLERS.closeModal();
-        UI_HANDLERS.updateUI();
+        UI_MANAGER.updateUI();
     },
 
-    updateUI: () => {
-        const char = GAME_STATE.character;
-        if (!char) return;
+    editQuest: (index) => {
+        const q = GAME_STATE.quests[index];
+        const html = `<div class="form-group"><label>Tên nhiệm vụ</label><input type="text" id="q-title" value="${q.title}" class="premium-input"></div>`;
+        COMPONENTS.showModal('SỬA NHIỆM VỤ', html, () => {
+            q.title = document.getElementById('q-title').value;
+            PERSISTENCE.save();
+            UI_MANAGER.updateUI();
+            UI_MANAGER.closeModal();
+        });
+    },
 
-        // Permanent Nav Stats
-        document.getElementById('nav-level-badge').textContent = `LVL ${char.level}`;
-        document.getElementById('nav-gold-display').textContent = `${char.gold.toLocaleString()} Gold`;
-        const xpRequired = PROGRESSION.getXPRequired(char.level);
-        const xpPercent = (char.xp / xpRequired) * 100;
-        document.getElementById('nav-xp-progress').style.width = `${xpPercent}%`;
-
-        if (UI_HANDLERS.currentScreen === 'home') {
-            document.getElementById('char-name').textContent = char.name;
-            const rankInfo = PROGRESSION.getRankInfo(char.level);
-            document.getElementById('char-class-title').textContent = `${char.classIcon || ''} ${char.className} • Level ${char.level} (${rankInfo.currentRank.name})`;
-            document.querySelectorAll('.stat-card').forEach(card => {
-                const statType = card.dataset.stat;
-                const value = char.stats[statType] || 0;
-                card.querySelector('.stat-value').textContent = value;
-                card.querySelector('.stat-fill').style.width = `${Math.min(value * 2, 100)}%`;
-            });
-            COMPONENTS.renderJourneyMap(char.level);
+    deleteQuest: (index) => {
+        if(confirm('Xóa nhiệm vụ này?')) {
+            GAME_STATE.quests.splice(index, 1);
+            PERSISTENCE.save();
+            UI_MANAGER.updateUI();
         }
+    },
 
-        if (UI_HANDLERS.currentScreen === 'quests') {
-            COMPONENTS.renderQuests(GAME_STATE.quests, UI_HANDLERS.toggleQuest);
-            COMPONENTS.renderIncome(GAME_STATE.income);
+    deleteIncome: (index) => {
+        if(confirm('Xóa thu nhập này?')) {
+            const inc = GAME_STATE.income[index];
+            GAME_STATE.character.gold -= inc.amount;
+            GAME_STATE.income.splice(index, 1);
+            PERSISTENCE.save();
+            UI_MANAGER.updateUI();
         }
+    },
 
-        if (UI_HANDLERS.currentScreen === 'skills') {
-            COMPONENTS.renderSkills(SKILLS_DB, GAME_STATE.skills, char.sp);
-        }
-
-        if (UI_HANDLERS.currentScreen === 'analytics') {
-            COMPONENTS.renderAchievements(ACHIEVEMENTS_DB, GAME_STATE.achievements);
-        }
-
-        UI_HANDLERS.checkAchievements();
+    addIncome: () => {
+        const html = `<div class="form-group"><label>Nguồn thu</label><input type="text" id="i-source" class="premium-input"></div>
+                      <div class="form-group"><label>Số tiền (VNĐ)</label><input type="number" id="i-amount" class="premium-input"></div>`;
+        COMPONENTS.showModal('GHI NHẬN LOOT (T4)', html, () => {
+            const s = document.getElementById('i-source').value;
+            const a = parseInt(document.getElementById('i-amount').value);
+            if (s && a > 0) {
+                GAME_STATE.income.push({ source: s, amount: a, timestamp: Date.now() });
+                GAME_STATE.character.gold += a;
+                ENGINE.addXP(Math.floor(a / 10000));
+                PERSISTENCE.save();
+                UI_MANAGER.updateUI();
+                UI_MANAGER.closeModal();
+            }
+        });
     },
 
     addQuest: () => {
         const html = `
-            <div class="form-group">
-                <label>Tên nhiệm vụ</label>
-                <input type="text" id="q-title" placeholder="VD: Gửi 5 email khách hàng..." class="premium-input">
+            <div class="form-group"><label>Tên nhiệm vụ</label><input type="text" id="q-title" class="premium-input" placeholder="Ví dụ: Đọc sách 30p, Code 2h..."></div>
+            <div class="form-group"><label>Độ khó</label><select id="q-diff" class="premium-select">
+                <option value="E">E (Dễ - 10 XP)</option><option value="D">D (20 XP)</option><option value="C" selected>C (Trung bình - 50 XP)</option>
+                <option value="B">B (100 XP)</option><option value="A">A (Khó - 250 XP)</option><option value="S">S (Siêu khó - 1000 XP)</option>
+            </select></div>
+            <div class="form-group"><label>Chỉ số phát triển (Chọn 1 hoặc nhiều)</label>
+                <div class="stat-toggle-group">
+                    <div class="stat-toggle-btn active" data-type="t1" onclick="this.classList.toggle('active')">
+                        <span class="icon">🧠</span>
+                        <span class="label">TÀI NĂNG (T1)</span>
+                    </div>
+                    <div class="stat-toggle-btn" data-type="t2" onclick="this.classList.toggle('active')">
+                        <span class="icon">🤝</span>
+                        <span class="label">TÍN NHIỆM (T2)</span>
+                    </div>
+                    <div class="stat-toggle-btn" data-type="t3" onclick="this.classList.toggle('active')">
+                        <span class="icon">📢</span>
+                        <span class="label">TIẾNG TĂM (T3)</span>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label>Độ khó (E-S)</label>
-                <select id="q-diff" class="premium-select">
-                    <option value="10">E - Dễ (10 XP)</option>
-                    <option value="25" selected>C - Thường (25 XP)</option>
-                    <option value="50">B - Khó (50 XP)</option>
-                    <option value="100">A - Rất Khó (100 XP)</option>
-                    <option value="250">S - Epic (250 XP)</option>
-                </select>
-            </div>
-        `;
+            ${COMPONENTS.renderPresetPicker(GAME_STATE.character.classId)}`;
+            
         COMPONENTS.showModal('THÊM NHIỆM VỤ', html, () => {
             const title = document.getElementById('q-title').value;
-            const xp = parseInt(document.getElementById('q-diff').value);
+            const diff = document.getElementById('q-diff').value;
+            const types = Array.from(document.querySelectorAll('.stat-toggle-btn.active')).map(btn => btn.dataset.type);
             if (title) {
-                GAME_STATE.quests.push({ title, xp, completed: false, created: Date.now() });
+                GAME_STATE.quests.push({ 
+                    title, 
+                    difficulty: diff, 
+                    xp: {E:10,D:20,C:50,B:100,A:250,S:1000}[diff], 
+                    types: types.length ? types : ['t1'], 
+                    completed: false 
+                });
                 PERSISTENCE.save();
-                UI_HANDLERS.updateUI();
-                UI_HANDLERS.closeModal();
+                UI_MANAGER.updateUI();
+                UI_MANAGER.closeModal();
             }
         });
     },
 
-    toggleQuest: (index) => {
-        const quest = GAME_STATE.quests[index];
-        quest.completed = !quest.completed;
-        if (quest.completed) {
-            let bonus = 0;
-            if (GAME_STATE.skills.includes('deep_work_1')) bonus += quest.xp * 0.1;
-            if (GAME_STATE.skills.includes('flow_state') && quest.xp >= 100) bonus += 50;
-            UI_HANDLERS.addXP(quest.xp + bonus);
+    selectPresetQuest: (index) => {
+        const char = GAME_STATE.character;
+        const preset = PRESET_QUESTS[char.classId][index];
+        if (!preset) return;
+
+        const titleInput = document.getElementById('q-title');
+        if (titleInput) {
+            // Modal is open, fill it
+            titleInput.value = preset.title;
+            document.getElementById('q-diff').value = preset.difficulty;
+            
+            // Update Stat Toggles
+            const presetTypes = preset.types || ['t1'];
+            document.querySelectorAll('.stat-toggle-btn').forEach(btn => {
+                btn.classList.toggle('active', presetTypes.includes(btn.dataset.type));
+            });
         } else {
-            UI_HANDLERS.addXP(-quest.xp);
+            // Modal not open, direct add
+            GAME_STATE.quests.push({ 
+                title: preset.title, 
+                difficulty: preset.difficulty, 
+                xp: {E:10,D:20,C:50,B:100,A:250,S:1000}[preset.difficulty], 
+                types: preset.types || ['t1'], 
+                completed: false 
+            });
+            PERSISTENCE.save();
+            UI_MANAGER.updateUI();
         }
-        PERSISTENCE.save();
-        UI_HANDLERS.updateUI();
     },
 
-    addIncome: () => {
+    // 4T REINVESTMENT MENU
+    showReinvestMenu: () => {
+        const char = GAME_STATE.character;
+        const cost = ENGINE.calculateReinvestCost(char.level);
         const html = `
-            <div class="form-group">
-                <label>Nguồn thu (Loot source)</label>
-                <input type="text" id="i-source" placeholder="VD: Dự án A, Bán hàng..." class="premium-input">
-            </div>
-            <div class="form-group">
-                <label>Số vàng (Gold)</label>
-                <input type="number" id="i-amount" placeholder="Số tiền kiếm được..." class="premium-input">
+            <div style="text-align:center">
+                <p style="margin-bottom:20px">Sử dụng T4 (Tài chính) để tái đầu tư vào bản thân. <br> Chi phí hiện tại: <strong style="color:var(--gold)">${cost.toLocaleString('vi-VN')} VNĐ / +1 điểm</strong></p>
+                <div class="reinvest-options" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+                    <button class="premium-btn" onclick="ENGINE.reinvest('t1')">🧠 T1</button>
+                    <button class="premium-btn" onclick="ENGINE.reinvest('t2')">🤝 T2</button>
+                    <button class="premium-btn" onclick="ENGINE.reinvest('t3')">📢 T3</button>
+                </div>
             </div>
         `;
-        COMPONENTS.showModal('GHI NHẬN LOOT', html, () => {
-            const source = document.getElementById('i-source').value;
-            let amount = parseInt(document.getElementById('i-amount').value);
-            if (source && amount) {
-                if (GAME_STATE.skills.includes('gold_magnet_1')) amount = Math.floor(amount * 1.05);
-                GAME_STATE.income.push({ source, amount, timestamp: Date.now() });
-                GAME_STATE.character.gold += amount;
-                const date = new Date().toISOString().split('T')[0];
-                GAME_STATE.history.gold.push({ date, amount });
-                const bonusXP = Math.max(5, Math.floor(amount / 1000));
-                UI_HANDLERS.addXP(bonusXP);
-                PERSISTENCE.save();
-                UI_HANDLERS.updateUI();
-                UI_HANDLERS.closeModal();
-            }
-        });
+        COMPONENTS.showModal('💎 TÁI ĐẦU TƯ 4T', html);
     },
 
-    addXP: (amount) => {
-        const char = GAME_STATE.character;
-        char.xp += amount;
-        if (char.xp < 0) char.xp = 0;
-        if (amount > 0) {
-            const date = new Date().toISOString().split('T')[0];
-            GAME_STATE.history.xp.push({ date, amount });
+    showSettings: () => {
+        const html = COMPONENTS.renderSettings();
+        COMPONENTS.showModal('⚙️ CÀI ĐẶT HỆ THỐNG', html);
+    },
+
+    showScreenHelp: (screen) => {
+        UI_MANAGER.showScreenHelp(screen);
+    },
+
+    changeClass: () => {
+        if (confirm('Bạn muốn đổi Class nhân vật? (Tên và XP của bạn vẫn được giữ nguyên)')) {
+            UI_MANAGER.showOnboarding();
         }
-        let xpRequired = PROGRESSION.getXPRequired(char.level);
-        while (char.xp >= xpRequired) {
-            char.xp -= xpRequired;
-            char.level++;
-            char.sp += 1;
-            xpRequired = PROGRESSION.getXPRequired(char.level);
-            Object.keys(char.stats).forEach(s => char.stats[s] += 1);
-            UI_HANDLERS.showLevelUpToast(char.level);
-        }
-    },
-
-    showLevelUpToast: (level) => {
-        const toast = document.createElement('div');
-        toast.className = 'level-up-toast';
-        toast.innerHTML = `🎉 LEVEL UP! <strong>Level ${level}</strong> đạt được! +1 Skill Point`;
-        document.body.appendChild(toast);
-        requestAnimationFrame(() => toast.classList.add('show'));
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 400);
-        }, 3000);
-    },
-
-    unlockSkill: (skillId) => {
-        const skill = SKILLS_DB.find(s => s.id === skillId);
-        if (GAME_STATE.character.sp >= skill.cost && !GAME_STATE.skills.includes(skillId)) {
-            GAME_STATE.character.sp -= skill.cost;
-            GAME_STATE.skills.push(skillId);
-            if (skill.type === 'stat') GAME_STATE.character.stats[skill.effect.stat] += skill.effect.value;
-            PERSISTENCE.save();
-            UI_HANDLERS.updateUI();
-        }
-    },
-
-    checkAchievements: () => {
-        ACHIEVEMENTS_DB.forEach(ach => {
-            if (!GAME_STATE.achievements.includes(ach.id) && ach.criteria(GAME_STATE)) {
-                GAME_STATE.achievements.push(ach.id);
-                PERSISTENCE.save();
-            }
-        });
-    },
-
-    initCharts: () => {
-        const char = GAME_STATE.character;
-        if (!char) return;
-        if (UI_HANDLERS.charts.xp) UI_HANDLERS.charts.xp.destroy();
-        if (UI_HANDLERS.charts.radar) UI_HANDLERS.charts.radar.destroy();
-
-        const xpCtx = document.getElementById('xp-chart').getContext('2d');
-        UI_HANDLERS.charts.xp = new Chart(xpCtx, {
-            type: 'line',
-            data: {
-                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                datasets: [{
-                    label: 'XP Gained',
-                    data: [12, 19, 3, 5, 2, 3, 0],
-                    borderColor: '#4f46e5',
-                    tension: 0.4,
-                    fill: true,
-                    backgroundColor: 'rgba(79, 70, 229, 0.1)'
-                }]
-            },
-            options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
-        });
-
-        const radarCtx = document.getElementById('radar-chart').getContext('2d');
-        UI_HANDLERS.charts.radar = new Chart(radarCtx, {
-            type: 'radar',
-            data: {
-                labels: Object.keys(char.stats).map(s => s.toUpperCase()),
-                datasets: [{
-                    label: 'Stats',
-                    data: Object.values(char.stats),
-                    backgroundColor: 'rgba(79, 70, 229, 0.2)',
-                    borderColor: '#4f46e5',
-                    pointBackgroundColor: '#4f46e5'
-                }]
-            },
-            options: {
-                plugins: { legend: { display: false } },
-                scales: {
-                    r: {
-                        angleLines: { color: 'rgba(255,255,255,0.05)' },
-                        grid: { color: 'rgba(255,255,255,0.05)' },
-                        pointLabels: { color: '#a1a1aa' },
-                        ticks: { display: false }
-                    }
-                }
-            }
-        });
-    },
-
-    resetGame: () => {
-        if (confirm('Bạn có chắc chắn muốn XÓA TOÀN BỘ dữ liệu và bắt đầu lại từ đầu không?')) {
-            localStorage.clear();
-            window.location.reload();
-        }
-    },
-
-    closeModal: () => {
-        document.getElementById('modal-overlay').classList.add('hidden');
     }
 };
 
-// Boot
+// Bootstrap
 window.onload = UI_HANDLERS.init;
-
-
