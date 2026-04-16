@@ -47,8 +47,15 @@ const UI_MANAGER = {
 
         if (UI_MANAGER.currentScreen === 'home') {
             document.getElementById('char-name').textContent = char.name;
-            const rankName = char.rankName || 'Apprentice';
-            document.getElementById('char-class-title').textContent = `${char.classIcon || ''} ${char.className} • Level ${char.level} (${rankName})`;
+            
+            // Luôn tính toán Rank mới nhất theo tiếng Việt dựa trên chỉ số thấp nhất (Nguyên lý Thùng gỗ)
+            const t4Value = (char.gold || 0) / 1000000;
+            const stats = [char.stats.t1 || 0, char.stats.t2 || 0, char.stats.t3 || 0, t4Value];
+            const lowestStat = Math.min(...stats);
+            const rankInfo = PROGRESSION.getRankInfoByStat(lowestStat);
+            const rankName = rankInfo.currentRank.name;
+            
+            document.getElementById('char-class-title').textContent = `${char.classIcon || ''} ${char.className} • Cấp độ ${char.level} • ${rankName}`;
             document.getElementById('rank-name').textContent = rankName;
 
             document.querySelectorAll('.stat-card').forEach(card => {
@@ -220,6 +227,7 @@ const UI_MANAGER = {
     closeModal: () => {
         const overlay = document.getElementById('modal-overlay');
         if (overlay) overlay.classList.add('hidden');
+        document.body.classList.remove('modal-open');
     }
 };
 

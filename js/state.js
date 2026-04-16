@@ -215,8 +215,8 @@ const GAME_TEXT = {
                 desc: "Cuộc đời bạn được vận hành bởi 4 bánh xe này. Bạn phát triển bản thân để tăng Tài năng, giữ lời hứa để tăng Tín nhiệm, truyền thông để có Tiếng tăm, và từ đó kiếm được Tài chính, rồi lại tiếp tục tái đầu tư phát triển 4T trong vòng lặp mới."
             },
             {
-                title: "2. Nguyên lý Thùng gỗ (Cực kỳ quan trọng!)",
-                desc: "Đẳng cấp (Rank) của bạn bị giới hạn bởi chỉ số thấp nhất trong 4T. Nếu bạn giỏi (T1 cao) nhưng không có ai tin tưởng (T2 thấp), bạn vẫn chỉ là 'Tập sự'. Hãy phát triển một cách cân bằng để bền vững!"
+                title: "2. Nguyên lý Thùng gỗ (Cơ chế thăng cấp Rank)",
+                desc: "Đẳng cấp (Rank) của bạn bị giới hạn bởi chỉ số thấp nhất trong 4T. <br>• <b>Cấp 10 (Thành thạo):</b> Khi tất cả chỉ số đạt 10+<br>• <b>Cấp 25 (Chuyên gia):</b> Khi tất cả chỉ số đạt 25+<br>• <b>Cấp 50 (Bậc thầy):</b> Khi tất cả chỉ số đạt 50+<br>• <b>Cấp 100 (Huyền thoại):</b> Khi tất cả chỉ số đạt 100+."
             },
             {
                 title: "3. Vòng lặp Thành công",
@@ -239,6 +239,19 @@ const PROGRESSION = {
 
         for (let i = 0; i < RANKS.length; i++) {
             if (level >= RANKS[i].level) {
+                currentRank = RANKS[i];
+                nextRank = RANKS[i + 1] || null;
+            }
+        }
+        return { currentRank, nextRank };
+    },
+
+    getRankInfoByStat: (statValue) => {
+        let currentRank = RANKS[0];
+        let nextRank = RANKS[1];
+
+        for (let i = 0; i < RANKS.length; i++) {
+            if (statValue >= RANKS[i].level) { // Sử dụng cùng ngưỡng level cho chỉ số
                 currentRank = RANKS[i];
                 nextRank = RANKS[i + 1] || null;
             }

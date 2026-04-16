@@ -291,7 +291,7 @@ input, button, textarea, select {
 .journey-track-container {
     margin-top: 24px;
     position: relative;
-    padding: 10px 0;
+    padding: 10px 20px;
 }
 
 #journey-progress-bar {
@@ -312,10 +312,46 @@ input, button, textarea, select {
     transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.journey-milestones { display: flex; justify-content: space-between; position: relative; z-index: 2; }
-.milestone-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--bg-elevated); border: 2px solid var(--border); transition: 0.4s; }
-.milestone.reached .milestone-dot { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px var(--accent-glow); transform: scale(1.2); }
-.milestone-label { font-size: 0.6rem; color: var(--text-dim); margin-top: 24px; display: block; }
+.journey-milestones { 
+    position: relative; 
+    z-index: 2; 
+    height: 40px; 
+    margin-top: -5px; /* Căn chỉnh với thanh progress */
+}
+
+.milestone { 
+    position: absolute; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    transform: translateX(-50%); 
+    transition: all 0.3s ease;
+}
+
+.milestone-dot { 
+    width: 12px; 
+    height: 12px; 
+    border-radius: 50%; 
+    background: var(--bg-elevated); 
+    border: 2px solid var(--border); 
+    z-index: 3;
+    transition: 0.4s; 
+}
+
+.milestone.reached .milestone-dot { 
+    background: var(--accent); 
+    border-color: var(--accent); 
+    box-shadow: 0 0 10px var(--accent-glow); 
+    transform: scale(1.2); 
+}
+
+.milestone-label { 
+    font-size: 0.65rem; 
+    color: var(--text-dim); 
+    margin-top: 8px; 
+    white-space: nowrap;
+    font-weight: 600;
+}
 
 /* Skills and Analytics */
 /* Skill Tree Category Styling */
@@ -570,6 +606,8 @@ input, button, textarea, select {
     text-transform: uppercase;
     letter-spacing: 1px;
 }
+
+.onboarding-container {
     max-width: 600px;
     margin: 0 auto;
     padding: 60px 20px 40px;
@@ -577,6 +615,55 @@ input, button, textarea, select {
     display: flex;
     flex-direction: column;
     justify-content: center;
+}
+
+/* Mobile Responsiveness for Top Nav (iPhone 17 style) */
+@media (max-width: 450px) {
+    #main-nav {
+        padding: 0 12px;
+        gap: 8px;
+    }
+    
+    #main-nav .logo {
+        font-size: 1rem;
+        min-width: fit-content;
+    }
+    
+    .user-compact-stats {
+        gap: 6px;
+        background: rgba(255,255,255,0.05);
+        padding: 4px 8px;
+        border-radius: 100px;
+    }
+    
+    .user-compact-stats .xp-bar-container {
+        display: none; /* Ẩn thanh XP trong Nav trên mobile để tránh chật chội */
+    }
+
+    #nav-gold-display {
+        font-size: 0.75rem;
+    }
+
+    #nav-level-badge {
+        font-size: 0.75rem;
+        padding: 2px 6px;
+    }
+    
+    .nav-actions {
+        gap: 4px;
+    }
+}
+
+/* Modal Interaction Lock */
+body.modal-open {
+    overflow: hidden; /* Khóa cuộn trang nền */
+}
+
+body.modal-open #bottom-nav {
+    pointer-events: none; /* Khóa hoàn toàn tương tác */
+    opacity: 0.2; /* Làm mờ hẳn */
+    filter: grayscale(1) blur(2px); /* Hiệu ứng vô hiệu hóa mạnh hơn */
+    transition: 0.3s;
 }
 
 .step-dots {
@@ -969,18 +1056,42 @@ input, button, textarea, select {
 .preset-info {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 6px;
+    flex: 1;
 }
 
 .preset-title {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: var(--text-main);
+    line-height: 1.4;
 }
 
 .preset-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.difficulty-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    min-width: 32px;
+    text-align: center;
+}
+
+.difficulty-badge.S { color: #f59e0b; border-color: #f59e0b; }
+.difficulty-badge.A { color: #8b5cf6; border-color: #8b5cf6; }
+.difficulty-badge.B { color: #3b82f6; border-color: #3b82f6; }
+
+.xp-badge {
     font-size: 0.75rem;
-    color: var(--text-dim);
+    color: var(--gold);
+    font-weight: 600;
 }
 
 .btn-add-preset {

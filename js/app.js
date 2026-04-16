@@ -88,6 +88,7 @@ const UI_HANDLERS = {
         if (!hasData || !GAME_STATE.character) {
             UI_MANAGER.showOnboarding();
         } else {
+            ENGINE.autoAssess(); // Đảm bảo Rank luôn là tiếng Việt mới nhất
             UI_MANAGER.showDashboard();
         }
         UI_HANDLERS.setupGlobalEvents();

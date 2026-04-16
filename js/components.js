@@ -105,22 +105,49 @@ const COMPONENTS = {
         // Use the rankName calculated by Engine Assessment
         document.getElementById('rank-name').textContent = char.rankName || 'Apprentice';
         
-        // Calculate total progress: based on the lowest stat to reflect "Theory of Constraints"
-        const stats = [char.stats.t1||0, char.stats.t2||0, char.stats.t3||0, (char.gold/1000000)||0];
-        const lowestStat = Math.min(...stats);
-        const progress = Math.min((lowestStat / 100) * 100, 100);
+        // Determine the "Effective Level" - you are only as strong as your weakest link (including XP level)
+        const statsObj = [
+            { label: 't1', val: char.stats.t1 || 0 },
+            { label: 't2', val: char.stats.t2 || 0 },
+            { label: 't3', val: char.stats.t3 || 0 },
+            { label: 't4', val: (char.gold / 1000000) || 0 }
+        ];
+        const lowestObj = statsObj.reduce((prev, curr) => (prev.val < curr.val) ? prev : curr);
+        
+        // Effective Level is the minimum of XP Level and the lowest 4T stat
+        const effectiveLevel = Math.min(char.level, lowestObj.val);
+        const progress = Math.min((effectiveLevel / 100) * 100, 100);
+        
         progressBar.style.setProperty('--progress', `${progress}%`);
         
         container.innerHTML = '';
         RANKS.forEach(rank => {
             const milestone = document.createElement('div');
-            milestone.className = `milestone ${lowestStat >= rank.level ? 'reached' : ''}`;
+            // Milestone is reached only if effective level hits the rank level
+            milestone.className = `milestone ${effectiveLevel >= rank.level ? 'reached' : ''}`;
+            milestone.style.left = `${rank.level}%`;
             milestone.innerHTML = `
                 <div class="milestone-dot"></div>
-                <span class="milestone-label">4T-${rank.level}</span>
+                <span class="milestone-label">${rank.level}</span>
             `;
             container.appendChild(milestone);
         });
+
+        // Add bottleneck indicator
+        const statLabels = { t1: 'Tài năng (T1)', t2: 'Tín nhiệm (T2)', t3: 'Tiếng tăm (T3)', t4: 'Tài chính (T4)' };
+        let bottleneckMsg = document.getElementById('bottleneck-indicator');
+        if (!bottleneckMsg) {
+            bottleneckMsg = document.createElement('div');
+            bottleneckMsg.id = 'bottleneck-indicator';
+            bottleneckMsg.style.cssText = 'font-size: 0.65rem; color: var(--text-dim); margin-top: 45px; text-align: center; font-style: italic;';
+            container.parentNode.appendChild(bottleneckMsg);
+        }
+
+        if (char.level < lowestObj.val) {
+            bottleneckMsg.innerHTML = `⚠️ Nút thắt hiện tại: <span style="color:var(--accent)">Cấp độ (XP)</span> (Cần làm thêm nhiệm vụ để lên cấp)`;
+        } else {
+            bottleneckMsg.innerHTML = `⚠️ Nút thắt hiện tại: <span style="color:var(--accent)">${statLabels[lowestObj.label]}</span> (Cần nâng chỉ số này để tiến hành trình)`;
+        }
     },
 
     // Phase 2: Render Skills Grid
@@ -216,7 +243,10 @@ const COMPONENTS = {
                         <div class="preset-item" onclick="UI_HANDLERS.selectPresetQuest(${i})">
                             <div class="preset-info">
                                 <span class="preset-title">${p.title}</span>
-                                <span class="preset-meta">Độ khó: ${p.difficulty} | +${{E:10,D:20,C:50,B:100,A:250,S:1000}[p.difficulty]} XP</span>
+                                <div class="preset-meta">
+                                    <span class="difficulty-badge ${p.difficulty}">${p.difficulty}</span>
+                                    <span class="xp-badge">+${{E:10,D:20,C:50,B:100,A:250,S:1000}[p.difficulty]} XP</span>
+                                </div>
                             </div>
                             <button class="btn-add-preset">+</button>
                         </div>
@@ -243,6 +273,8 @@ const COMPONENTS = {
         `;
         
         overlay.classList.remove('hidden');
+        document.body.classList.add('modal-open');
+        
         if (onSave) {
             document.getElementById('modal-save-btn').onclick = onSave;
         } else {
