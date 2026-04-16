@@ -222,7 +222,7 @@ const UI_HANDLERS = {
                 </button>
             </div>
 
-            <div class="preset-section" style="margin-top: 32px; border-top: 1px solid var(--border); padding-top: 24px;">
+            <div class="preset-section" style="margin-top: 8px;">
                 ${COMPONENTS.renderPresetPicker(GAME_STATE.character.classId)}
             </div>
         `;
