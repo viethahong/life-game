@@ -46,7 +46,11 @@ const UI_MANAGER = {
         document.getElementById('nav-xp-progress').style.width = `${xpPercent}%`;
 
         if (UI_MANAGER.currentScreen === 'home') {
-            document.getElementById('char-name').textContent = char.name;
+            const charName = document.getElementById('char-name');
+            const classTitle = document.getElementById('char-class-title');
+            const rankBadge = document.getElementById('rank-name');
+
+            if (charName) charName.textContent = char.name;
             
             // Luôn tính toán Rank mới nhất theo tiếng Việt dựa trên chỉ số thấp nhất (T1, T2, T3)
             const stats = [char.stats.t1 || 0, char.stats.t2 || 0, char.stats.t3 || 0];
@@ -55,8 +59,8 @@ const UI_MANAGER = {
             const rankInfo = PROGRESSION.getRankInfoByStat(effectiveLevelCap);
             const rankName = rankInfo.currentRank.name;
             
-            document.getElementById('char-class-title').textContent = `${char.classIcon || ''} ${char.className} • Cấp độ ${char.level} • ${rankName}`;
-            document.getElementById('rank-name').textContent = rankName;
+            if (classTitle) classTitle.textContent = `${char.classIcon || ''} ${char.className} • Cấp độ ${char.level} • ${rankName}`;
+            if (rankBadge) rankBadge.textContent = rankName;
 
             document.querySelectorAll('.stat-card').forEach(card => {
                 const statType = card.dataset.stat;
@@ -69,18 +73,26 @@ const UI_MANAGER = {
                     value = char.stats[statType] || 0;
                 }
                 
-                // Round to 1 decimal place
-                const displayValue = typeof value === 'number' ? value.toFixed(1) : value;
-                card.querySelector('.stat-value').textContent = displayValue.toString().endsWith('.0') ? Math.floor(value) : displayValue;
+                const valEl = card.querySelector('.stat-value');
+                const fillEl = card.querySelector('.stat-fill');
                 
-                if (statType !== 'ps') {
-                    // Progress bar fill based on value
-                    card.querySelector('.stat-fill').style.width = `${Math.min(value * 2, 100)}%`;
+                if (valEl) {
+                    // Round to 1 decimal place
+                    const displayValue = typeof value === 'number' ? value.toFixed(1) : value;
+                    valEl.textContent = displayValue.toString().endsWith('.0') ? Math.floor(value) : displayValue;
+                }
+                
+                if (fillEl && statType !== 'ps') {
+                    fillEl.style.width = `${Math.min(value * 2, 100)}%`;
                 }
             });
-            COMPONENTS.renderJourneyMap(char.level);
+
+            // Journey Map
+            if (document.getElementById('journey-milestones')) {
+                COMPONENTS.renderJourneyMap(char.level);
+            }
             
-            // Render Home Guide
+            // Home Guide
             const guideContainer = document.getElementById('home-guide');
             if (guideContainer) {
                 guideContainer.innerHTML = COMPONENTS.renderHomeGuide();

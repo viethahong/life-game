@@ -84,21 +84,28 @@ const ONBOARDING = {
 // =============================================
 const UI_HANDLERS = {
     init: () => {
-        const hasData = PERSISTENCE.load();
-        if (!hasData || !GAME_STATE.character) {
-            UI_MANAGER.showOnboarding();
-        } else {
-            ENGINE.autoAssess(); // Đảm bảo Rank luôn là tiếng Việt mới nhất
-            UI_MANAGER.showDashboard();
+        try {
+            const hasData = PERSISTENCE.load();
+            if (!hasData || !GAME_STATE.character) {
+                UI_MANAGER.showOnboarding();
+            } else {
+                ENGINE.autoAssess(); // Đảm bảo Rank luôn là tiếng Việt mới nhất
+                UI_MANAGER.showDashboard();
+            }
+            UI_HANDLERS.setupGlobalEvents();
+            UI_MANAGER.updateUI();
+        } catch (e) {
+            console.error("Boot Error:", e);
+        } finally {
+            // Loader finish - ALWAYS HIDE after safety margin
+            setTimeout(() => {
+                const l = document.getElementById('app-loading-screen');
+                if(l) { 
+                    l.style.opacity = '0'; 
+                    setTimeout(() => l.remove(), 500); 
+                }
+            }, 800);
         }
-        UI_HANDLERS.setupGlobalEvents();
-        UI_MANAGER.updateUI();
-        
-        // Loader finish
-        setTimeout(() => {
-            const l = document.getElementById('app-loading-screen');
-            if(l) { l.style.opacity = '0'; setTimeout(() => l.remove(), 500); }
-        }, 500);
 
         // PWA Service Worker Registration
         if ('serviceWorker' in navigator) {
@@ -137,7 +144,7 @@ const UI_HANDLERS = {
 
     editQuest: (index) => {
         const q = GAME_STATE.quests[index];
-        const html = `<div class="form-group"><label>Tên nhiệm vụ</label><input type="text" id="q-title" value="${q.title}" class="premium-input"></div>`;
+        const html = '<div class="form-group"><label>Tên nhiệm vụ</label><input type="text" id="q-title" value="' + q.title + '" class="premium-input"></div>';
         COMPONENTS.showModal('SỬA NHIỆM VỤ', html, () => {
             q.title = document.getElementById('q-title').value;
             PERSISTENCE.save();
@@ -165,15 +172,14 @@ const UI_HANDLERS = {
     },
 
     addIncome: () => {
-        const html = `<div class="form-group"><label>Nguồn thu</label><input type="text" id="i-source" class="premium-input"></div>
-                      <div class="form-group"><label>Số tiền (VNĐ)</label><input type="number" id="i-amount" class="premium-input"></div>`;
+        const html = '<div class="form-group"><label>Nguồn thu</label><input type="text" id="i-source" class="premium-input"></div>' +
+                      '<div class="form-group"><label>Số tiền (VNĐ)</label><input type="number" id="i-amount" class="premium-input"></div>';
         COMPONENTS.showModal('GHI NHẬN LOOT (T4)', html, () => {
             const s = document.getElementById('i-source').value;
             const a = parseInt(document.getElementById('i-amount').value);
             if (s && a > 0) {
                 GAME_STATE.income.push({ source: s, amount: a, timestamp: Date.now() });
                 GAME_STATE.character.gold += a;
-                ENGINE.addXP(Math.floor(a / 10000));
                 PERSISTENCE.save();
                 UI_MANAGER.updateUI();
                 UI_MANAGER.closeModal();
@@ -182,7 +188,7 @@ const UI_HANDLERS = {
     },
 
     addQuest: () => {
-        const html = `
+        const html = \`
             <div class="form-group">
                 <label>Tên nhiệm vụ</label>
                 <input type="text" id="q-title" class="premium-input" placeholder="Ví dụ: Đọc sách 30p, Code 2h...">
@@ -223,9 +229,9 @@ const UI_HANDLERS = {
             </div>
 
             <div class="preset-section" style="margin-top: 8px;">
-                ${COMPONENTS.renderPresetPicker(GAME_STATE.character.classId)}
+                \${COMPONENTS.renderPresetPicker(GAME_STATE.character.classId)}
             </div>
-        `;
+        \`;
             
         COMPONENTS.showModal('THÊM NHIỆM VỤ', html, null);
         
@@ -263,17 +269,13 @@ const UI_HANDLERS = {
 
         const titleInput = document.getElementById('q-title');
         if (titleInput) {
-            // Modal is open, fill it
             titleInput.value = preset.title;
             document.getElementById('q-diff').value = preset.difficulty;
-            
-            // Update Stat Toggles
             const presetTypes = preset.types || ['t1'];
             document.querySelectorAll('.stat-toggle-btn').forEach(btn => {
                 btn.classList.toggle('active', presetTypes.includes(btn.dataset.type));
             });
         } else {
-            // Modal not open, direct add
             GAME_STATE.quests.push({ 
                 title: preset.title, 
                 difficulty: preset.difficulty, 
@@ -290,16 +292,16 @@ const UI_HANDLERS = {
     showReinvestMenu: () => {
         const char = GAME_STATE.character;
         const cost = ENGINE.calculateReinvestCost(char.level);
-        const html = `
+        const html = \`
             <div style="text-align:center">
-                <p style="margin-bottom:20px">Sử dụng T4 (Tài chính) để tái đầu tư vào bản thân. <br> Chi phí hiện tại: <strong style="color:var(--gold)">${cost.toLocaleString('vi-VN')} VNĐ / +1 điểm</strong></p>
+                <p style="margin-bottom:20px">Sử dụng T4 (Tài chính) để tái đầu tư vào bản thân. <br> Chi phí hiện tại: <strong style="color:var(--gold)">\${cost.toLocaleString('vi-VN')} VNĐ / +1 điểm</strong></p>
                 <div class="reinvest-options" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
-                    <button class="premium-btn" onclick="ENGINE.reinvest('t1')">🧠 T1</button>
-                    <button class="premium-btn" onclick="ENGINE.reinvest('t2')">🤝 T2</button>
-                    <button class="premium-btn" onclick="ENGINE.reinvest('t3')">📢 T3</button>
+                    <button class="premium-btn" onclick="UI_HANDLERS.reinvest('t1', event)">🧠 T1</button>
+                    <button class="premium-btn" onclick="UI_HANDLERS.reinvest('t2', event)">🤝 T2</button>
+                    <button class="premium-btn" onclick="UI_HANDLERS.reinvest('t3', event)">📢 T3</button>
                 </div>
             </div>
-        `;
+        \`;
         COMPONENTS.showModal('💎 TÁI ĐẦU TƯ 4T', html);
     },
 
@@ -315,6 +317,28 @@ const UI_HANDLERS = {
     changeClass: () => {
         if (confirm('Bạn muốn đổi Class nhân vật? (Tên và XP của bạn vẫn được giữ nguyên)')) {
             UI_MANAGER.showOnboarding();
+        }
+    },
+
+    reinvest: (statId, event) => {
+        const result = ENGINE.reinvest(statId);
+        if (result.success) {
+            // Visual feedback: Floating text at click position
+            const statLabels = { t1: 'Tài năng', t2: 'Tín nhiệm', t3: 'Tiếng tăm' };
+            const label = statLabels[statId];
+            UI_MANAGER.showFloatingText(\`+1 \${label}\`, event.clientX, event.clientY, 'var(--accent)');
+            UI_MANAGER.showFloatingText(\`+\${result.xpAward} XP\`, event.clientX, event.clientY - 25, 'var(--gold)');
+            
+            // Button feedback: Flash
+            const btn = event.currentTarget;
+            btn.classList.add('btn-success-flash');
+            setTimeout(() => btn.classList.remove('btn-success-flash'), 500);
+        } else {
+            if (result.reason === 'ceiling_reached') {
+                alert(\`Bạn đã chạm trần kĩ năng hiện tại (\${result.maxStat}). \n\nHãy thực hiện Quest để nâng cao kĩ năng giỏi nhất của bạn trước khi dùng tiền đầu tư tiếp!\`);
+            } else {
+                alert(\`Bạn không đủ tiền! Cần \${result.cost.toLocaleString('vi-VN')} VNĐ.\`);
+            }
         }
     }
 };

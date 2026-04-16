@@ -273,10 +273,25 @@ const PERSISTENCE = {
         if (data) {
             try {
                 const parsed = JSON.parse(data);
+                
+                // Deep migration to ensure required fields exist
+                if (parsed.character) {
+                    if (!parsed.character.stats) parsed.character.stats = { t1: 0, t2: 0, t3: 0 };
+                    if (parsed.character.xp === undefined) parsed.character.xp = 0;
+                    if (parsed.character.level === undefined) parsed.character.level = 1;
+                    if (!parsed.character.rankName) parsed.character.rankName = 'Apprentice';
+                }
+                
+                if (!parsed.quests) parsed.quests = [];
+                if (!parsed.income) parsed.income = [];
+                if (!parsed.skills) parsed.skills = [];
+                if (!parsed.achievements) parsed.achievements = [];
+                if (!parsed.history) parsed.history = { xp: [], gold: [] };
+                
                 Object.assign(GAME_STATE, parsed);
                 return true;
             } catch (e) {
-                console.error("Lỗi load dữ liệu:", e);
+                console.error("Lỗi phục hồi dữ liệu:", e);
                 return false;
             }
         }
