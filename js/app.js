@@ -223,7 +223,6 @@ const UI_HANDLERS = {
             </div>
 
             <div class="preset-section" style="margin-top: 32px; border-top: 1px solid var(--border); padding-top: 24px;">
-                <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Gợi ý từ Hội đồng SAGE:</p>
                 ${COMPONENTS.renderPresetPicker(GAME_STATE.character.classId)}
             </div>
         `;
