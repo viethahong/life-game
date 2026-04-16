@@ -183,12 +183,23 @@ const UI_HANDLERS = {
 
     addQuest: () => {
         const html = `
-            <div class="form-group"><label>Tên nhiệm vụ</label><input type="text" id="q-title" class="premium-input" placeholder="Ví dụ: Đọc sách 30p, Code 2h..."></div>
-            <div class="form-group"><label>Độ khó</label><select id="q-diff" class="premium-select">
-                <option value="E">E (Dễ - 10 XP)</option><option value="D">D (20 XP)</option><option value="C" selected>C (Trung bình - 50 XP)</option>
-                <option value="B">B (100 XP)</option><option value="A">A (Khó - 250 XP)</option><option value="S">S (Siêu khó - 1000 XP)</option>
-            </select></div>
-             <div class="form-group"><label>Chỉ số phát triển (Chọn 1 hoặc nhiều)</label>
+            <div class="form-group">
+                <label>Tên nhiệm vụ</label>
+                <input type="text" id="q-title" class="premium-input" placeholder="Ví dụ: Đọc sách 30p, Code 2h...">
+            </div>
+            <div class="form-group">
+                <label>Độ khó</label>
+                <select id="q-diff" class="premium-select">
+                    <option value="E">E (Dễ - 10 XP)</option>
+                    <option value="D">D (20 XP)</option>
+                    <option value="C" selected>C (Trung bình - 50 XP)</option>
+                    <option value="B">B (100 XP)</option>
+                    <option value="A">A (Khó - 250 XP)</option>
+                    <option value="S">S (Siêu khó - 1000 XP)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Chỉ số phát triển (Chọn 1 hoặc nhiều)</label>
                 <div class="stat-toggle-group">
                     <div class="stat-toggle-btn active" data-type="t1" onclick="this.classList.toggle('active')">
                         <span class="icon">🧠</span>
@@ -204,12 +215,31 @@ const UI_HANDLERS = {
                     </div>
                 </div>
             </div>
-            ${COMPONENTS.renderPresetPicker(GAME_STATE.character.classId)}`;
             
-        COMPONENTS.showModal('THÊM NHIỆM VỤ', html, () => {
+            <div class="modal-primary-actions" style="margin-top: 24px;">
+                <button class="premium-btn w-full" id="inner-save-btn" style="width: 100%; padding: 18px; font-size: 1.1rem; background: var(--accent); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 700;">
+                    💾 LƯU NHIỆM VỤ
+                </button>
+            </div>
+
+            <div class="preset-section" style="margin-top: 32px; border-top: 1px solid var(--border); padding-top: 24px;">
+                <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Gợi ý từ Hội đồng SAGE:</p>
+                ${COMPONENTS.renderPresetPicker(GAME_STATE.character.classId)}
+            </div>
+        `;
+            
+        COMPONENTS.showModal('THÊM NHIỆM VỤ', html, null);
+        
+        // Hide default footer button to avoid confusion
+        const footer = document.getElementById('modal-footer');
+        if (footer) footer.style.display = 'none';
+
+        // Bind the inner save button
+        document.getElementById('inner-save-btn').onclick = () => {
             const title = document.getElementById('q-title').value;
             const diff = document.getElementById('q-diff').value;
             const types = Array.from(document.querySelectorAll('.stat-toggle-btn.active')).map(btn => btn.dataset.type);
+            
             if (title) {
                 GAME_STATE.quests.push({ 
                     title, 
@@ -221,8 +251,10 @@ const UI_HANDLERS = {
                 PERSISTENCE.save();
                 UI_MANAGER.updateUI();
                 UI_MANAGER.closeModal();
+            } else {
+                alert("Vui lòng nhập tên nhiệm vụ!");
             }
-        });
+        };
     },
 
     selectPresetQuest: (index) => {
