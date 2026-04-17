@@ -133,6 +133,7 @@ const UI_HANDLERS = {
         }
         PERSISTENCE.save();
         UI_MANAGER.updateUI();
+        ENGINE.checkAchievements();
     },
 
     editQuest: (index) => {
@@ -176,6 +177,7 @@ const UI_HANDLERS = {
                 // ENGINE.addXP removed - XP now comes only from reinvestment
                 PERSISTENCE.save();
                 UI_MANAGER.updateUI();
+                ENGINE.checkAchievements();
                 UI_MANAGER.closeModal();
             }
         });
@@ -331,12 +333,40 @@ const UI_HANDLERS = {
             const btn = event.currentTarget;
             btn.classList.add('btn-success-flash');
             setTimeout(() => btn.classList.remove('btn-success-flash'), 500);
+            ENGINE.checkAchievements();
         } else {
             if (result.reason === 'ceiling_reached') {
                 alert(`Bạn đã chạm trần kĩ năng hiện tại (${result.maxStat}). \n\nHãy thực hiện Quest để nâng cao kĩ năng giỏi nhất của bạn trước khi dùng tiền đầu tư tiếp!`);
             } else {
                 alert(`Bạn không đủ tiền! Cần ${result.cost.toLocaleString('vi-VN')} VNĐ.`);
             }
+        }
+    },
+
+    unlockSkill: (skillId) => {
+        if (GAME_STATE.skills.includes(skillId)) return;
+        
+        const skill = SKILLS_DB.find(s => s.id === skillId);
+        if (!skill) return;
+
+        const char = GAME_STATE.character;
+        if (char.sp >= skill.cost) {
+            char.sp -= skill.cost;
+            GAME_STATE.skills.push(skillId);
+            ENGINE.applySkillEffect(skill);
+            PERSISTENCE.save();
+            UI_MANAGER.updateUI();
+            UI_MANAGER.showAnnouncement(`KỸ NĂNG MỚI: ${skill.name.toUpperCase()}!`);
+        } else {
+            alert("Bạn không đủ Skill Points (SP)!");
+        }
+    },
+
+    showKnowledgeCard: (skillId) => {
+        const skill = SKILLS_DB.find(s => s.id === skillId);
+        if (skill) {
+            const html = COMPONENTS.renderKnowledgeCard(skill);
+            COMPONENTS.showModal('KHO TÀNG TRI THỨC', html);
         }
     }
 };

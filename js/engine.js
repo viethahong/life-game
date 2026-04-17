@@ -160,5 +160,25 @@ const ENGINE = {
             });
         }
         ENGINE.autoAssess();
+    },
+
+    checkAchievements: () => {
+        const char = GAME_STATE.character;
+        if (!char) return;
+
+        ACHIEVEMENTS_DB.forEach(ach => {
+            // Only check if not already unlocked
+            if (!GAME_STATE.achievements.includes(ach.id)) {
+                try {
+                    if (ach.criteria(GAME_STATE)) {
+                        GAME_STATE.achievements.push(ach.id);
+                        UI_MANAGER.showAnnouncement(`THÀNH TỰU MỚI: ${ach.name.toUpperCase()}!`);
+                        PERSISTENCE.save();
+                    }
+                } catch (e) {
+                    console.error(`Lỗi kiểm tra thành tựu ${ach.id}:`, e);
+                }
+            }
+        });
     }
 };
