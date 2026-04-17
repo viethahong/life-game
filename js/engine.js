@@ -144,11 +144,10 @@ const ENGINE = {
 
     calculatePowerScore: () => {
         const stats = GAME_STATE.character.stats || {};
-        const gold = GAME_STATE.character.gold || 0;
-        // Formula: (T1 + T2 + T3) * log10(Gold/100k + 1)
-        const financeMultiplier = Math.log10(gold / 100000 + 1) + 1;
-        const totalBaseStats = (stats.t1 || 0) + (stats.t2 || 0) + (stats.t3 || 0);
-        return Math.floor(totalBaseStats * financeMultiplier);
+        // Formula: (T1 + T2) * T3
+        const coreValue = (stats.t1 || 0) + (stats.t2 || 0);
+        const reputation = (stats.t3 || 0);
+        return Math.floor(coreValue * reputation);
     },
 
     applySkillEffect: (skill) => {
