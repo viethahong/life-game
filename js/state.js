@@ -180,7 +180,24 @@ const ACHIEVEMENTS_DB = [
     { id: 'wealthy_2', name: 'Nhà Khởi Nghiệp Bản Lĩnh', icon: '🚀', description: 'Tích lũy 100.000.000 VNĐ.', criteria: (state) => state.character.gold >= 100000000 },
     { id: 'wealthy_3', name: 'Cỗ Máy In Tiền Tự Động', icon: '⚙️', description: 'Tích lũy 500.000.000 VNĐ.', criteria: (state) => state.character.gold >= 500000000 },
     { id: 'wealthy_freedom', name: 'BẬC THẦY TỰ DO TÀI CHÍNH', icon: '👑', description: 'Cột mốc Legend: 1 TỶ VNĐ.', criteria: (state) => state.character.gold >= 1000000000 },
-    { id: 'streak_master', name: 'Kỷ Luật Thép', icon: '🔥', description: 'Đuy trì chuỗi 7 ngày hoạt động.', criteria: (state) => state.character.streak >= 7 }
+    { id: 'streak_master', name: 'Kỷ Luật Thép', icon: '🔥', description: 'Duy trì chuỗi 7 ngày hoạt động.', criteria: (state) => state.character.streak >= 7 },
+    { id: 'discipline_diamond', name: 'Kỷ Luật Kim Cương', icon: '💎', description: 'Đạt chuỗi 30 ngày kỷ luật.', criteria: (state) => state.character.streak >= 30 },
+    
+    // Level Milestones
+    { id: 'lvl_10', name: 'Người Sẵn Sàng', icon: '🎖️', description: 'Đạt cấp độ 10.', criteria: (state) => state.character.level >= 10 },
+    { id: 'lvl_50', name: 'Chiến Binh Thực Thụ', icon: '🛡️', description: 'Đạt cấp độ 50.', criteria: (state) => state.character.level >= 50 },
+    { id: 'lvl_100', name: 'Huyền Thoại!', icon: '👑', description: 'Đạt cấp độ 100.', criteria: (state) => state.character.level >= 100 },
+    
+    // 4T Specialization
+    { id: 'perfect_balance', name: 'Sự Cân Bằng Hoàn Hảo', icon: '⚖️', description: 'Tất cả T1, T2, T3 đều đạt mốc 10+.', criteria: (state) => (state.character.stats.t1 >= 10 && state.character.stats.t2 >= 10 && state.character.stats.t3 >= 10) },
+    { id: 'stat_expert', name: 'Chuyên Gia Lĩnh Vực', icon: '🚩', description: 'Một chỉ số đạt mốc 50+.', criteria: (state) => (state.character.stats.t1 >= 50 || state.character.stats.t2 >= 50 || state.character.stats.t3 >= 50) },
+    
+    // Skills & Mastery
+    { id: 'skill_collector', name: 'Học Giả Ham Học', icon: '📚', description: 'Mở khóa 10 kỹ năng khác nhau.', criteria: (state) => state.skills.length >= 10 },
+    
+    // Power Score
+    { id: 'power_1k', name: 'Sức Mạnh Vượt Trội', icon: '⚡', description: 'Power Score đạt mốc 1.000.', criteria: (state) => ENGINE.calculatePowerScore() >= 1000 },
+    { id: 'power_10k', name: 'Vị Thế Độc Tôn', icon: '🌌', description: 'Power Score đạt mốc 10.000.', criteria: (state) => ENGINE.calculatePowerScore() >= 10000 }
 ];
 
 // Phase 2: Ranks for Journey Map

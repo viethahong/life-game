@@ -343,6 +343,17 @@ const UI_HANDLERS = {
         }
     },
 
+    showSkillDetail: (skillId) => {
+        const skill = SKILLS_DB.find(s => s.id === skillId);
+        if (!skill) return;
+        
+        const isUnlocked = GAME_STATE.skills.includes(skillId);
+        const char = GAME_STATE.character;
+        
+        const html = COMPONENTS.renderSkillDetail(skill, isUnlocked, char.sp);
+        COMPONENTS.showModal(isUnlocked ? '📜 CHI TIẾT BÀI HỌC' : '🔍 CHI TIẾT KỸ NĂNG', html);
+    },
+
     unlockSkill: (skillId) => {
         if (GAME_STATE.skills.includes(skillId)) return;
         
@@ -356,17 +367,10 @@ const UI_HANDLERS = {
             ENGINE.applySkillEffect(skill);
             PERSISTENCE.save();
             UI_MANAGER.updateUI();
+            UI_MANAGER.closeModal(); // Close detail modal after unlocking
             UI_MANAGER.showAnnouncement(`KỸ NĂNG MỚI: ${skill.name.toUpperCase()}!`);
         } else {
             alert("Bạn không đủ Skill Points (SP)!");
-        }
-    },
-
-    showKnowledgeCard: (skillId) => {
-        const skill = SKILLS_DB.find(s => s.id === skillId);
-        if (skill) {
-            const html = COMPONENTS.renderKnowledgeCard(skill);
-            COMPONENTS.showModal('KHO TÀNG TRI THỨC', html);
         }
     }
 };

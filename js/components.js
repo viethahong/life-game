@@ -174,19 +174,20 @@ const COMPONENTS = {
             
             const skillsHTML = skills.map(skill => {
                 const isUnlocked = unlockedIDs.includes(skill.id);
-                const canAfford = skillPoints >= skill.cost;
-                const clickHandler = isUnlocked ? `UI_HANDLERS.showKnowledgeCard('${skill.id}')` : (canAfford ? `UI_HANDLERS.unlockSkill('${skill.id}')` : '');
+                const clickHandler = `UI_HANDLERS.showSkillDetail('${skill.id}')`;
                 
                 return `
                     <div class="skill-card ${isUnlocked ? 'unlocked' : 'locked'}" onclick="${clickHandler}">
                         <div class="skill-icon">${skill.icon}</div>
                         <div class="skill-info">
                             <h4>${skill.name}</h4>
-                            <p>${skill.description}</p>
-                            ${isUnlocked ? 
-                                '<span class="badge-unlocked">MASTERED</span>' : 
-                                `<button class="btn-unlock" ${!canAfford ? 'disabled' : ''}>Học (${skill.cost} SP)</button>`
-                            }
+                            <p>${skill.description && skill.description.length > 50 ? skill.description.substring(0, 50) + '...' : skill.description}</p>
+                            <div class="skill-status-row">
+                                ${isUnlocked ? 
+                                    '<span class="badge-unlocked">MASTERED</span>' : 
+                                    `<span class="badge-cost">Yêu cầu: ${skill.cost} SP</span>`
+                                }
+                            </div>
                         </div>
                     </div>
                 `;
@@ -208,17 +209,40 @@ const COMPONENTS = {
     },
 
     // Phase 2: Render Achievements
-    renderKnowledgeCard: (skill) => {
+    // Phase 2: Render Skill Detail (Unified Detail & Knowledge Card)
+    renderSkillDetail: (skill, isUnlocked, skillPoints) => {
+        const canAfford = skillPoints >= skill.cost;
+        
         return `
             <div class="knowledge-card-popup">
                 <div class="knowledge-icon">${skill.icon}</div>
-                <h3>${skill.name}</h3>
+                <h2 style="text-align:center; color:white; margin-bottom:8px;">${skill.name}</h2>
+                <p style="text-align:center; color:var(--text-dim); font-size:0.9rem; margin-bottom:20px;">${skill.description}</p>
+                
                 <div class="knowledge-divider"></div>
+                
                 <div class="knowledge-lesson">
-                    <p>${skill.lesson || 'Kiến thức đang được cập nhật...'}</p>
+                    ${isUnlocked ? 
+                        `<div class="lesson-content">
+                            <h4 style="color:var(--accent); margin-bottom:8px;">BÀI HỌC KỸ NĂNG:</h4>
+                            <p>${skill.lesson || 'Kiến thức đang được cập nhật...'}</p>
+                        </div>` : 
+                        `<div class="unlock-prompt" style="text-align:center; padding:10px 0;">
+                            <p style="margin-bottom:16px; font-size:0.95rem;">Bạn muốn dành thời gian nghiên cứu và học kỹ năng này?</p>
+                            <button class="premium-btn" 
+                                onclick="UI_HANDLERS.unlockSkill('${skill.id}')"
+                                ${!canAfford ? 'disabled style="filter:grayscale(1); opacity:0.5;"' : ''}>
+                                ${canAfford ? `Học ngay (${skill.cost} SP)` : `Thiếu SP (Cần ${skill.cost} SP)`}
+                            </button>
+                        </div>`
+                    }
                 </div>
-                <div class="knowledge-footer">
-                    <span>💡 Kỹ năng này đã giúp bạn mạnh mẽ hơn!</span>
+                
+                <div class="knowledge-footer" style="margin-top:20px; border-top:1px solid var(--border); padding-top:15px;">
+                    ${isUnlocked ? 
+                        `<span>💡 Kỹ năng này đã giúp bạn mạnh mẽ hơn!</span>` : 
+                        `<span>🔥 Hãy thăng cấp để tích lũy thêm Skill Points (SP)</span>`
+                    }
                 </div>
             </div>
         `;
