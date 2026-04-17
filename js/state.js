@@ -197,7 +197,68 @@ const ACHIEVEMENTS_DB = [
     
     // Power Score
     { id: 'power_1k', name: 'Sức Mạnh Vượt Trội', icon: '⚡', description: 'Power Score đạt mốc 1.000.', criteria: (state) => ENGINE.calculatePowerScore() >= 1000 },
-    { id: 'power_10k', name: 'Vị Thế Độc Tôn', icon: '🌌', description: 'Power Score đạt mốc 10.000.', criteria: (state) => ENGINE.calculatePowerScore() >= 10000 }
+    { id: 'power_10k', name: 'Vị Thế Độc Tôn', icon: '🌌', description: 'Power Score đạt mốc 10.000.', criteria: (state) => ENGINE.calculatePowerScore() >= 10000 },
+
+    // --- ADVANCED BEHAVIORAL ACHIEVEMENTS ---
+    { 
+        id: 'strategic_investor', 
+        name: 'Nhà Đầu Tư Chiến Lược', 
+        icon: '🐋', 
+        description: 'Tổng số tiền tái đầu tư tích lũy đạt 100.000.000 VNĐ.', 
+        criteria: (state) => (state.history.gold || []).reduce((sum, e) => e.note?.includes('Reinvest') ? sum + Math.abs(e.amount) : sum, 0) >= 100000000 
+    },
+    { 
+        id: 'pioneer', 
+        name: 'Người Tiên Phong', 
+        icon: '🌊', 
+        description: 'Thực hiện lần tái đầu tư đầu tiên.', 
+        criteria: (state) => (state.history.gold || []).some(e => e.note?.includes('Reinvest')) 
+    },
+    { 
+        id: 'income_streamer', 
+        name: 'Dòng Tiền Đa Dạng', 
+        icon: '🏢', 
+        description: 'Có ít nhất 3 nguồn thu nhập khác nhau.', 
+        criteria: (state) => new Set(state.income.map(i => i.source)).size >= 3 
+    },
+    { 
+        id: 'big_loot', 
+        name: 'Vụ Làm Ăn Lớn', 
+        icon: '💰', 
+        description: 'Ghi nhận một khoản Loot đơn lẻ trị giá trên 50.000.000 VNĐ.', 
+        criteria: (state) => state.income.some(i => i.amount >= 50000000) 
+    },
+    { 
+        id: 'peak_performance', 
+        name: 'Đỉnh Cao Năng Suất', 
+        icon: '🚅', 
+        description: 'Kiếm được 1.000 XP trong một ngày duy nhất.', 
+        criteria: (state) => {
+            const today = new Date().toLocaleDateString('en-CA');
+            return (state.history.xp || []).filter(e => e.date === today).reduce((sum, e) => sum + e.amount, 0) >= 1000;
+        }
+    },
+    { 
+        id: 'quest_overload', 
+        name: 'Cỗ Máy Công Việc', 
+        icon: '⚙️', 
+        description: 'Duy trì cùng lúc 10 nhiệm vụ trong danh sách.', 
+        criteria: (state) => state.quests.length >= 10 
+    },
+    { 
+        id: 'all_rounder', 
+        name: 'Người Đa Tài', 
+        icon: '🌟', 
+        description: 'Tất cả chỉ số T1, T2, T3 đều đạt mốc 25+.', 
+        criteria: (state) => (state.character.stats.t1 >= 25 && state.character.stats.t2 >= 25 && state.character.stats.t3 >= 25) 
+    },
+    { 
+        id: 'the_face', 
+        name: 'Gương Mặt Thương Hiệu', 
+        icon: '📢', 
+        description: 'Tiếng tăm (T3) đạt mốc 75+ và vượt trên tổng Tài năng & Tín nhiệm.', 
+        criteria: (state) => state.character.stats.t3 >= 75 && state.character.stats.t3 > (state.character.stats.t1 + state.character.stats.t2) 
+    }
 ];
 
 // Phase 2: Ranks for Journey Map

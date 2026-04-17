@@ -198,10 +198,10 @@ const UI_MANAGER = {
         UI_MANAGER.charts.radar = new Chart(radarCtx, {
             type: 'radar',
             data: {
-                labels: ['🧠 T1 (Tài)', '🤝 T2 (Tín)', '📢 T3 (Tiếng)', '💰 T4 (Tiền)'],
+                labels: ['🧠 T1 (Tài năng)', '🤝 T2 (Tín nhiệm)', '📢 T3 (Tiếng tăm)'],
                 datasets: [{
-                    label: 'Chỉ số hiện tại',
-                    data: [char.stats.t1 || 0, char.stats.t2 || 0, char.stats.t3 || 0, t4Value],
+                    label: 'Năng lực cốt lõi',
+                    data: [char.stats.t1 || 0, char.stats.t2 || 0, char.stats.t3 || 0],
                     backgroundColor: 'rgba(79, 70, 229, 0.2)',
                     borderColor: '#4f46e5',
                     pointBackgroundColor: '#4f46e5',
