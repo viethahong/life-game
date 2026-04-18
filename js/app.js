@@ -94,11 +94,15 @@ const UI_HANDLERS = {
         UI_HANDLERS.setupGlobalEvents();
         UI_MANAGER.updateUI();
         
-        // Loader finish
+        // Loader finish with smooth transition
         setTimeout(() => {
             const l = document.getElementById('app-loading-screen');
-            if(l) { l.style.opacity = '0'; setTimeout(() => l.remove(), 500); }
-        }, 500);
+            if(l) { 
+                l.style.opacity = '0'; 
+                l.style.pointerEvents = 'none';
+                setTimeout(() => l.remove(), 800); 
+            }
+        }, 1000);
 
         // PWA Service Worker Registration
         if ('serviceWorker' in navigator) {
@@ -253,7 +257,7 @@ const UI_HANDLERS = {
                 UI_MANAGER.updateUI();
                 UI_MANAGER.closeModal();
             } else {
-                alert("Vui lòng nhập tên nhiệm vụ!");
+                UI_MANAGER.showAnnouncement("Vui lòng nhập tên nhiệm vụ!");
             }
         };
     },
@@ -336,9 +340,9 @@ const UI_HANDLERS = {
             ENGINE.checkAchievements();
         } else {
             if (result.reason === 'ceiling_reached') {
-                alert(`Bạn đã chạm trần kĩ năng hiện tại (${result.maxStat}). \n\nHãy thực hiện Quest để nâng cao kĩ năng giỏi nhất của bạn trước khi dùng tiền đầu tư tiếp!`);
+                UI_MANAGER.showAnnouncement(`TRẠM DỪNG KỸ NĂNG\n\nBạn đã chạm trần kĩ năng hiện tại (${result.maxStat}). \n\nHãy thực hiện Quest để nâng cao kĩ năng giỏi nhất của bạn trước khi dùng tiền đầu tư tiếp!`);
             } else {
-                alert(`Bạn không đủ tiền! Cần ${result.cost.toLocaleString('vi-VN')} VNĐ.`);
+                UI_MANAGER.showAnnouncement(`THIẾU TÀI CHÍNH\n\nBạn không đủ tiền! Cần ${result.cost.toLocaleString('vi-VN')} VNĐ.`);
             }
         }
     },
@@ -370,7 +374,7 @@ const UI_HANDLERS = {
             UI_MANAGER.closeModal(); // Close detail modal after unlocking
             UI_MANAGER.showAnnouncement(`KỸ NĂNG MỚI: ${skill.name.toUpperCase()}!`);
         } else {
-            alert("Bạn không đủ Skill Points (SP)!");
+            UI_MANAGER.showAnnouncement("Bạn không đủ Skill Points (SP)!");
         }
     }
 };

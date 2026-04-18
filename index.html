@@ -11,13 +11,18 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="manifest" href="manifest.json">
     <!-- Chart.js cho Analytics -->
+    <!-- Canvas Confetti for Visual Effects -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="dark-theme">
     <!-- Full Screen Loader Overlay -->
     <div id="app-loading-screen">
         <div class="loader-container">
-            <div class="loader-spinner"></div>
+            <div class="loader-visual">
+                <div class="loader-ring"></div>
+                <div class="loader-orb"></div>
+            </div>
             <div class="loader-text">DUNGEON LOADING...</div>
         </div>
     </div>

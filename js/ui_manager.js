@@ -117,6 +117,16 @@ const UI_MANAGER = {
 
     // --- FEEDBACK & NOTIFICATIONS ---
     showLevelUpToast: (level) => {
+        // Trigger celebratory confetti
+        if (typeof confetti === 'function') {
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#4f46e5', '#7c3aed', '#f59e0b']
+            });
+        }
+
         const toast = document.createElement('div');
         toast.className = 'level-up-toast';
         toast.innerHTML = `🎉 LEVEL UP! <strong>Level ${level}</strong> đạt được! +1 Skill Point`;
@@ -136,6 +146,17 @@ const UI_MANAGER = {
         const msg = (Array.isArray(types) ? types : [types])
             .map(t => `${prefix}${absAmount} ${labels[t] || t.toUpperCase()}`)
             .join(' | ');
+
+        // Trigger subtle confetti for gains
+        if (!isLoss && typeof confetti === 'function') {
+            confetti({
+                particleCount: 40,
+                spread: 50,
+                origin: { y: 0.8 },
+                gravity: 1.2,
+                colors: ['#10b981', '#4f46e5']
+            });
+        }
 
         const toast = document.createElement('div');
         toast.className = 'stat-toast';

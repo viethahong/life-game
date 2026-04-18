@@ -43,8 +43,9 @@ const COMPONENTS = {
 
         container.innerHTML = '';
         quests.forEach((q, index) => {
+            const isBoss = q.difficulty === 'S';
             const item = document.createElement('div');
-            item.className = `quest-item ${q.completed ? 'completed' : ''}`;
+            item.className = `quest-item ${q.completed ? 'completed' : ''} ${isBoss ? 'boss-quest' : ''}`;
             item.innerHTML = `
                 <div class="item-info">
                     <div class="quest-types-icons" style="margin-right: 12px; display: flex; gap: 4px;">
